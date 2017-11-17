@@ -28,7 +28,10 @@ Servo myservo5;
 Servo myservo6;
 Servo myservo7;
 Servo myservo8;
+Servo servo; // temp servo controll for switching between servos
 
+int pin = 2;
+int temp[10] = {};
 float pos = 0;    // variable to store the servo position
 
 void setup() {
@@ -38,9 +41,12 @@ void setup() {
 	myservo4.attach(5);
 	myservo5.attach(6);
 	myservo6.attach(7);
-	myservo7.attach(8);
-	myservo8.attach(9);
-
+	temp[0] = myservo.read();
+	temp[1] = myservo2.read();
+	temp[2] = myservo3.read();
+	temp[3] = myservo4.read();
+	temp[4] = myservo5.read();
+	temp[5] = myservo6.read();
 	Serial.begin(115200);
 #if !defined(__MIPSEL__)
 	while (!Serial); // Wait for serial port to connect - used on Leonardo, Teensy and other boards with built-in USB CDC serial connection
@@ -51,6 +57,7 @@ void setup() {
 	}
 	Serial.print(F("\r\nXbox Wireless Receiver Library Started"));
 }
+
 void loop() {
 	Usb.Task();
 	if (Xbox.XboxReceiverConnected) {
@@ -64,9 +71,9 @@ void loop() {
 				float leftRight = ((leftStickX / 32768) * 180);	// Calculation to scale the measurements to go between 30 - 150
 				float forwardBack = ((leftStickY / 32768) * 180); // Multiplying by -1 to reverse the direction of the motors
 
-				//myservo.write(leftRight);
-				//myservo2.write(forwardBack);
-				//delay(100);
+																  //myservo.write(leftRight);
+																  //myservo2.write(forwardBack);
+																  //delay(100);
 
 
 				if (Xbox.getButtonClick(UP, i)) {
@@ -96,25 +103,174 @@ void loop() {
 				}
 				if (Xbox.getButtonClick(L3, i))
 					Serial.println(F("L3"));
+
 				if (Xbox.getButtonClick(R3, i))
 					Serial.println(F("R3"));
 
-				if (Xbox.getButtonClick(L1, i))
-				{
+				if (Xbox.getButtonClick(L1, i)) {
+					int temp_ = servo.read();
+					servo.detach();
+					switch (pin) {
+					case 2:
+						myservo.attach(2);
+						myservo.write(temp[0]);
+						break;
+					case 3:
+						myservo2.attach(3);
+						myservo2.write(temp[1]);
+						break;
+					case 4:
+						myservo3.attach(4);
+						myservo3.write(temp_);
+						break;
+					case 5:
+						myservo4.attach(5);
+						myservo4.write(temp_);
+						break;
+					case 6:
+						myservo5.attach(6);
+						myservo5.write(temp_);
+						break;
+					case 7:
+						myservo6.attach(7);
+						myservo6.write(temp_);
+						break;
+					default:
+						break;
+					}
+
+					temp[0] = myservo.read();
+					temp[1] = myservo2.read();
+					temp[2] = myservo3.read();
+					temp[3] = myservo4.read();
+					temp[4] = myservo5.read();
+					temp[5] = myservo6.read();
+					if (pin > 2) {
+						pin = pin - 1;
+					}
+					else {
+						pin = 7;
+					}
+
 					Serial.print(F("L1: "));
-					myservo2.write(180);
-					delay(1000);
-					Serial.println(myservo.read());
+					switch (pin) {
+					case 2:
+						myservo.detach();
+						servo.attach(pin);
+						servo.write(temp[0]);
+						break;
+					case 3:
+						myservo2.detach();
+						servo.attach(pin);
+						servo.write(temp[1]);
+						break;
+					case 4:
+						myservo3.detach();
+						servo.attach(pin);
+						servo.write(temp[2]);
+						break;
+					case 5:
+						myservo4.detach();
+						servo.attach(pin);
+						servo.write(temp[3]);
+						break;
+					case 6:
+						myservo5.detach();
+						servo.attach(pin);
+						servo.write(temp[4]);
+						break;
+					case 7:
+						myservo6.detach();
+						servo.attach(pin);
+						servo.write(temp[5]);
+						break;
+					default:
+						break;
+					}
 				}
 
-				if (Xbox.getButtonClick(R1, i))
-				{
+				if (Xbox.getButtonClick(R1, i)) {
+					int temp_ = servo.read();
+					servo.detach();
+					switch (pin) {
+					case 2:
+						myservo.attach(2);
+						myservo.write(temp[0]);
+						break;
+					case 3:
+						myservo2.attach(3);
+						myservo2.write(temp[1]);
+						break;
+					case 4:
+						myservo3.attach(4);
+						myservo3.write(temp_);
+						break;
+					case 5:
+						myservo4.attach(5);
+						myservo4.write(temp_);
+						break;
+					case 6:
+						myservo5.attach(6);
+						myservo5.write(temp_);
+						break;
+					case 7:
+						myservo6.attach(7);
+						myservo6.write(temp_);
+						break;
+					default:
+						break;
+					}
+
+					temp[0] = myservo.read();
+					temp[1] = myservo2.read();
+					temp[2] = myservo3.read();
+					temp[3] = myservo4.read();
+					temp[4] = myservo5.read();
+					temp[5] = myservo6.read();
+					if (pin < 7) {
+						pin = pin + 1;
+					}
+					else {
+						pin = 2;
+					}
 					Serial.println(F("R1"));
-					myservo2.write(0);
-					delay(1000);
-					Serial.println(myservo.read());
+					switch (pin) {
+					case 2:
+						myservo.detach();
+						servo.attach(pin);
+						servo.write(temp[0]);
+						break;
+					case 3:
+						myservo2.detach();
+						servo.attach(pin);
+						servo.write(temp[1]);
+						break;
+					case 4:
+						myservo3.detach();
+						servo.attach(pin);
+						servo.write(temp[2]);
+						break;
+					case 5:
+						myservo4.detach();
+						servo.attach(pin);
+						servo.write(temp[3]);
+						break;
+					case 6:
+						myservo5.detach();
+						servo.attach(pin);
+						servo.write(temp[4]);
+						break;
+					case 7:
+						myservo6.detach();
+						servo.attach(pin);
+						servo.write(temp[5]);
+						break;
+					default:
+						break;
+					}
 				}
-					if (Xbox.getButtonClick(XBOX, i)) {
+
+				if (Xbox.getButtonClick(XBOX, i)) {
 					Xbox.setLedMode(ROTATING, i);
 					Serial.print(F("Xbox (Battery: "));
 					Serial.print(Xbox.getBatteryLevel(i)); // The battery level in the range 0-3
@@ -125,17 +281,17 @@ void loop() {
 					Xbox.disconnect(i);
 				}
 
-				if (Xbox.getButtonClick(A, i))
+				if (Xbox.getButtonClick(A, i)) {
+					servo.write(servo.read() - 5);
 					Serial.println(F("A"));
+				}
 				if (Xbox.getButtonClick(B, i))
-					Serial.println(F("B"));
+					servo.write(servo.read() + 5);
+				Serial.println(F("B"));
 				if (Xbox.getButtonClick(X, i))
 					Serial.println(F("X"));
 				if (Xbox.getButtonClick(Y, i))
 					Serial.println(F("Y"));
-
-
-
 			}
 		}
 	}

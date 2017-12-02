@@ -68,12 +68,12 @@ void loop() {
 				float rightStickX = Xbox.getAnalogHat(RightHatX); // Right stick is currently unused
 				float rightStickY = Xbox.getAnalogHat(RightHatY);
 
-				float leftRight = ((leftStickX / 32768) * 180);	// Calculation to scale the measurements to go between 30 - 150
-				float forwardBack = ((leftStickY / 32768) * 180); // Multiplying by -1 to reverse the direction of the motors
+				//	float leftRight = ((leftStickX / 32768) * 180);	// Calculation to scale the measurements to go between 30 - 150
+				//	float forwardBack = ((leftStickY / 32768) * 180); // Multiplying by -1 to reverse the direction of the motors
 
-																  //myservo.write(leftRight);
-																  //myservo2.write(forwardBack);
-																  //delay(100);
+																	  //myservo.write(leftRight);
+																	  //myservo2.write(forwardBack);
+																	  //delay(100);
 
 
 				if (Xbox.getButtonClick(UP, i)) {
@@ -113,11 +113,11 @@ void loop() {
 					switch (pin) {
 					case 2:
 						myservo.attach(2);
-						myservo.write(temp[0]);
+						myservo.write(temp_);
 						break;
 					case 3:
 						myservo2.attach(3);
-						myservo2.write(temp[1]);
+						myservo2.write(temp_);
 						break;
 					case 4:
 						myservo3.attach(4);
@@ -187,6 +187,7 @@ void loop() {
 					default:
 						break;
 					}
+					Serial.println(pin);
 				}
 
 				if (Xbox.getButtonClick(R1, i)) {
@@ -195,11 +196,11 @@ void loop() {
 					switch (pin) {
 					case 2:
 						myservo.attach(2);
-						myservo.write(temp[0]);
+						myservo.write(temp_);
 						break;
 					case 3:
 						myservo2.attach(3);
-						myservo2.write(temp[1]);
+						myservo2.write(temp_);
 						break;
 					case 4:
 						myservo3.attach(4);
@@ -268,8 +269,8 @@ void loop() {
 					default:
 						break;
 					}
+					Serial.println(pin);
 				}
-
 				if (Xbox.getButtonClick(XBOX, i)) {
 					Xbox.setLedMode(ROTATING, i);
 					Serial.print(F("Xbox (Battery: "));
@@ -282,16 +283,26 @@ void loop() {
 				}
 
 				if (Xbox.getButtonClick(A, i)) {
-					servo.write(servo.read() - 5);
+					servo.write(servo.read() - 1);
 					Serial.println(F("A"));
 				}
 				if (Xbox.getButtonClick(B, i))
-					servo.write(servo.read() + 5);
+					servo.write(servo.read() + 1);
 				Serial.println(F("B"));
-				if (Xbox.getButtonClick(X, i))
+				if (Xbox.getButtonClick(X, i)){
+					for (int i = 0; i < 6; i++) {
+						servo.write(servo.read() - 1);
+						delay(100);
+					}
 					Serial.println(F("X"));
-				if (Xbox.getButtonClick(Y, i))
+			}
+				if (Xbox.getButtonClick(Y, i)) {
+					for (int i = 0; i < 6; i++) {
+						servo.write(servo.read() + 1);
+						delay(100);
+					}
 					Serial.println(F("Y"));
+				}
 			}
 		}
 	}

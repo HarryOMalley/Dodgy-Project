@@ -79,16 +79,25 @@ void motor(int program)
 		motorReverse();
 		break;
 	case 3:
-		setSpeed();
+		setDirectionRight();
+		break;
 	case 4:
-		writeEEPROM(MOTOR_DIRECTION, 1);
+		setDirectionLeft();
 		break;
 	case 5:
-		readEEPROM(MOTOR_DIRECTION);
+		setSpeed();
 		break;
 	case 6:
-		clearEEPROM();
+		getStatus();
 		break;
+	case 7:
+		readEEPROM(MOTOR_DIRECTION);
+		break;
+	case 8:
+		writeEEPROM(MOTOR_DIRECTION, 1);
+		break;
+	case 9:
+		clearEEPROM();
 	default: // run the motors
 		motorRun();
 		break;
@@ -101,48 +110,72 @@ void motorReverse()
 {
 	if (currentDirection == 1) // right
 	{
-		digitalWrite(in1, LOW); // change to left
-		digitalWrite(in2, HIGH);
-		writeEEPROM(MOTOR_DIRECTION, 2);
 		currentDirection = 2;
+		updateEEPROM();
 	}
 	else if (currentDirection == 2) // left
 	{
-		digitalWrite(in1, HIGH); // change to right
-		digitalWrite(in2, LOW);
-		writeEEPROM(MOTOR_DIRECTION, 1);
 		currentDirection = 1;
+		updateEEPROM();
 	}
+}
+
+void setDirectionRight()
+{
+	currentDirection = 1;
+	updateEEPROM();
+}
+
+void setDirectionLeft()
+{
+	currentDirection = 2;
+	updateEEPROM();
+}
+
+void getStatus()
+{
+	Serial.print("Direction ");
+	if (currentDirection == 1)
+		Serial.println("right");
+	else
+		Serial.println("left");
+	Serial.print("Status ");
+	if (motorStatus == 1)
+		Serial.println("off");
+	else
+		Serial.println("on");
+	Serial.print("Speed");
+	Serial.println(motorSpeed);
 }
 
 void motorOn()
 {
 	Serial.print("Current direction is: ");
 	Serial.println(currentDirection);
-	if (currentDirection == 1) // right
-	{
-		digitalWrite(in1, HIGH); // turn on
-		digitalWrite(in2, LOW);
-	}
-	else if (currentDirection == 2) // left
-	{
-		digitalWrite(in1, LOW); // turn on 
-		digitalWrite(in2, HIGH);
-	}
-	delayMicroseconds(1);
-	EEPROM.write(MOTOR_STATUS, 2);
+	//if (currentDirection == 1) // right
+	//{
+	//	digitalWrite(in1, HIGH); // turn on
+	//	digitalWrite(in2, LOW);
+	//}
+	//else if (currentDirection == 2) // left
+	//{
+	//	digitalWrite(in1, LOW); // turn on 
+	//	digitalWrite(in2, HIGH);
+	//}
+	//delayMicroseconds(1);
 	motorStatus = 2;
+	updateEEPROM();
 	Serial.println("Turned motor on");
 	return;
 }
 
 void motorOff()
 {
-	digitalWrite(in1, LOW); // turn off
-	digitalWrite(in2, LOW);
-	delayMicroseconds(1);
-	EEPROM.write(MOTOR_STATUS, 1);
+	//digitalWrite(in1, LOW); // turn off
+	//digitalWrite(in2, LOW);
+	//delayMicroseconds(1);
 	motorStatus = 1;
+	updateEEPROM();
 	Serial.println("Turned motor off");
 	return;
 }
@@ -150,18 +183,30 @@ void motorOff()
 void motorRun()
 {
 	if (motorStatus == 1) // if motor is supposed to be off, keep off
+	{
+		digitalWrite(in1, LOW); // turn off
+		digitalWrite(in2, LOW);
+		digitalWrite(in3, LOW); // turn off
+		digitalWrite(in4, LOW);
 		return;
+	}
 	else
 	{
+		analogWrite(enA, motorSpeed);
+		analogWrite(enB, motorSpeed);
 		switch (currentDirection)
 		{
 		case 1: // right
 			digitalWrite(in1, HIGH); // turn on
 			digitalWrite(in2, LOW);
+			digitalWrite(in3, HIGH); // turn on
+			digitalWrite(in4, LOW);
 			break;
 		case 2: // left
 			digitalWrite(in1, LOW); // turn on 
 			digitalWrite(in2, HIGH);
+			digitalWrite(in3, HIGH); // turn on
+			digitalWrite(in4, LOW);
 			break;
 		default:
 			// do nothing
@@ -186,8 +231,7 @@ void setSpeed()
 			break;
 		}
 	}
-	analogWrite(enA, motorSpeed);
-	EEPROM.write(MOTOR_SPEED, motorSpeed);
+	updateEEPROM();
 	Serial.println("Changed motor speed");
 }
 
@@ -208,4 +252,11 @@ void clearEEPROM()
 		EEPROM.write(i, 0);
 	}
 	Serial.println("Cleared EEPROM");
+}
+
+void updateEEPROM()
+{
+	EEPROM.write(MOTOR_SPEED, motorSpeed);
+	EEPROM.write(MOTOR_STATUS, motorStatus);
+	EEPROM.write(MOTOR_DIRECTION, currentDirection);
 }

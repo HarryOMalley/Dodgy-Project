@@ -3,34 +3,45 @@
  Created:	4/18/2018 1:53:27 PM
  Author:	harryomalley
 */
-#include <Encoder.h>
-#include "motorEncoders.h"
-#include "motors.h"
 #include <EEPROM.h>
+#include <Encoder.h>
+#include "motors.h"
 
 Motors motors;
 
-int currentDirection, motorStatus, motorSpeed;
+int currentDirection, motorStatus, motorSpeed, program;
 void setup()
 {
 	// set all the motor control pins to outputs
 	Serial.begin(9600);
-	Serial.println("Current direction, status and speed are: ");
-	Serial.println(currentDirection);
-	Serial.println(motorStatus);
-	Serial.println(motorSpeed);
 }
 
 void loop()
 {
-	int program;
-	while (Serial.available() > 0)
+	int newProgram;
+
+	IO input;
+	newProgram = input.getInput();
+	if (newProgram == 0)
 	{
+		// do nothing
+	}
+	else
+	{
+		program = newProgram;
+		Serial.print("Program: ");
+		Serial.println(program);
+		motors.run(program);
+	}
+	motors.run();
+	/*while (Serial.available() > 0)
+	{
+		Serial.println("recieved");
 		program = Serial.parseInt();
 		motors.run(program);
 	}
 	while (Serial.available() == 0)
 	{
 		motors.run();
-	}
+	}*/
 }

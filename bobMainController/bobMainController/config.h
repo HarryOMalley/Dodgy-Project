@@ -15,3 +15,7 @@
 #define enB 5
 #define in3 7
 #define in4 6
+// PWM pins
+#define pwm1 11
+#define pwm2 12
+#define pwm3 13

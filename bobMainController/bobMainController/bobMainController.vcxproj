@@ -83,10 +83,12 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
+    <ClInclude Include="IO.h" />
     <ClInclude Include="motors.h" />
     <ClInclude Include="__vm\.bobMainController.vsarduino.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="IO.cpp" />
     <ClCompile Include="motorEncoders.cpp" />
     <ClCompile Include="motorEncoders.h" />
     <ClCompile Include="motors.cpp" />
@@ -94,4 +96,9 @@
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
+  <ProjectExtensions>
+    <VisualStudio>
+      <UserProperties arduino.upload.port="COM4" />
+    </VisualStudio>
+  </ProjectExtensions>
 </Project>

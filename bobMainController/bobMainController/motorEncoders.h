@@ -1,11 +1,13 @@
 #include <Encoder.h>
 #include <Arduino.h>
+#include "config.h"
 class motorEncoders
 {
 public:
-	motorEncoders(int pin1, int pin2, int pin3, int pin4);
+	motorEncoders();
 	~motorEncoders();
 	long readMotors();
+	void resetMotors();
 private:
 	long positionLeft;
 	long positionRight;

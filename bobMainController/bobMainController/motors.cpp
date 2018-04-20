@@ -1,5 +1,58 @@
 #include "motors.h"
 
+IO::IO()
+{
+
+}
+
+int IO::getInput()
+{
+	int check;
+	check = digitalRead(pwm1);
+	if (check != 1)
+		return 0;
+	int newProgram;
+	newProgram = pulseIn(pwm2, HIGH);
+	//Serial.print("input: ");
+	//Serial.println(newProgram);
+	if (newProgram > 500 && newProgram < 1500)
+		program = 1;
+	else if (newProgram > 1500 && newProgram < 2500)
+		program = 2;
+	else if (newProgram > 2500 && newProgram < 3500)
+		program = 3;
+	else if (newProgram > 3500 && newProgram < 4500)
+		program = 4;
+	else if (newProgram > 4500 && newProgram < 5500)
+		program = 5;
+	else if (newProgram > 5500 && newProgram < 6500)
+		program = 6;
+	else if (newProgram > 6500 && newProgram < 7500)
+		program = 7;
+	else if (newProgram > 7500 && newProgram < 8500)
+		program = 8;
+	else if (newProgram > 8500 && newProgram < 9500)
+		program = 9;
+	else
+		return 0;
+	return program;
+}
+
+int IO::getSpeed()
+{
+	int newSpeed;
+	newSpeed = (pulseIn(pwm3, HIGH)) / 10;
+	return newSpeed;
+}
+
+void IO::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
+{
+	EEPROM.write(MOTOR_SPEED, motorSpeed);
+	EEPROM.write(MOTOR_STATUS, motorStatus);
+	EEPROM.write(MOTOR_DIRECTION, currentDirection);
+}
+
+
 Motors::Motors()
 {
 	pinMode(enA, OUTPUT);
@@ -11,6 +64,7 @@ Motors::Motors()
 	setup();
 	//motorEncoders encoder(); // work out how to fix the encoder problem before attempting this
 	//noInterrupts();
+	IO io;
 }
 
 Motors::~Motors()
@@ -98,12 +152,12 @@ void Motors::motorReverse()
 	if (currentDirection == 1) // right
 	{
 		currentDirection = 2;
-		updateEEPROM();
+		updateEEPROM(motorSpeed, motorStatus, currentDirection);
 	}
 	else if (currentDirection == 2) // left
 	{
 		currentDirection = 1;
-		updateEEPROM();
+		updateEEPROM(motorSpeed, motorStatus, currentDirection);
 	}
 }
 
@@ -113,7 +167,7 @@ void Motors::setDirection(int direction)
 		currentDirection = 1;
 	else
 		currentDirection = 2;
-	updateEEPROM();
+	updateEEPROM(motorSpeed, motorStatus, currentDirection);
 }
 
 void Motors::getStatus()
@@ -136,7 +190,7 @@ void Motors::getStatus()
 void Motors::motorOn()
 {
 	motorStatus = 2;
-	updateEEPROM();
+	updateEEPROM(motorSpeed, motorStatus, currentDirection);
 	Serial.println("Turned motor on");
 	return;
 }
@@ -144,24 +198,17 @@ void Motors::motorOn()
 void Motors::motorOff()
 {
 	motorStatus = 1;
-	updateEEPROM();
+	updateEEPROM(motorSpeed, motorStatus, currentDirection);
 	Serial.println("Turned motor off");
 	return;
 }
 
 void Motors::setSpeed()
 {
-	Serial.println("Input Speed: ");
-	while (true)
-	{
-		if (Serial.available())
-		{
-			motorSpeed = Serial.parseInt();
-			break;
-		}
-	}
-	updateEEPROM();
+	motorSpeed = io.getSpeed();
+	updateEEPROM(motorSpeed, motorStatus, currentDirection);
 	Serial.println("Changed motor speed");
+	Serial.println(motorSpeed);
 }
 
 //void Motors::setSpeed()
@@ -175,7 +222,7 @@ void Motors::setSpeed()
 //			break;
 //		}
 //	}
-//	updateEEPROM();
+//	updateEEPROM(motorSpeed, motorStatus, currentDirection);
 //	Serial.println("Changed motor speed");
 //}
 
@@ -224,12 +271,6 @@ void Motors::setup()
 	Serial.println(motorSpeed);
 }
 
-void Motors::updateEEPROM()
-{
-	EEPROM.write(MOTOR_SPEED, motorSpeed);
-	EEPROM.write(MOTOR_STATUS, motorStatus);
-	EEPROM.write(MOTOR_DIRECTION, currentDirection);
-}
 
 void Motors::turn(int direction)
 {
@@ -378,6 +419,13 @@ void Motors::move(int direction)
 		delay(1000);
 		break;
 	}
+}
+
+void Motors::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
+{
+	EEPROM.write(MOTOR_SPEED, motorSpeed);
+	EEPROM.write(MOTOR_STATUS, motorStatus);
+	EEPROM.write(MOTOR_DIRECTION, currentDirection);
 }
 
 void writeEEPROM(int location, int data)

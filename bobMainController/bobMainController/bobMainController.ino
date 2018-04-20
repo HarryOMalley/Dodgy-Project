@@ -6,7 +6,7 @@
 #include <EEPROM.h>
 #include <Encoder.h>
 #include "motors.h"
-
+IO io;
 Motors motors;
 
 int currentDirection, motorStatus, motorSpeed, program;
@@ -19,9 +19,7 @@ void setup()
 void loop()
 {
 	int newProgram;
-
-	IO input;
-	newProgram = input.getInput();
+	newProgram = io.getInput();
 	if (newProgram == 0)
 	{
 		// do nothing

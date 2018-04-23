@@ -4,44 +4,36 @@
  Author:	harryomalley
 */
 #include <EEPROM.h>
-#include <Encoder.h>
-#include "motors.h"
-IO io;
-Motors motors;
+#include "Control.h"
+
 Encoder motorRight(enc1, enc2);
 Encoder motorLeft(enc3, enc4);
-int currentDirection, motorStatus, motorSpeed, program;
+Control control;
+int currentDirection, motorStatus, motorSpeed, program, positionRight, positionLeft;
 void setup()
 {
-	// set all the motor control pins to outputs
 	Serial.begin(9600);
 }
 
 void loop()
 {
 	int newProgram;
-	//newProgram = io.getInput();
-	//if (newProgram == 0)
-	//{
-	//	motors.run();
-	//}
-	//else
-	//{
-	//	program = newProgram;
-	//	Serial.print("Program: ");
-	//	Serial.println(program);
-	//	motors.run(program);
-	//}
-	int right = motorRight.read();
-	Serial.println(right);
-	//while (Serial.available() > 0)
-	//{
-	//	Serial.println("recieved");
-	//	newProgram = Serial.parseInt();
-	//	motors.run(newProgram);
-	//}
-	//while (Serial.available() == 0)
-	//{
-	//	motors.run();
-	//}
+	control.run();
+	encoders();
+}
+
+void encoders()
+{
+	int newRight = motorRight.read();
+	int newLeft = motorLeft.read();
+	
+	if (newLeft != positionLeft || newRight != positionRight) {
+		Serial.print("Left = ");
+		Serial.print(newLeft);
+		Serial.print(", Right = ");
+		Serial.print(newRight);
+		Serial.println();
+		positionLeft = newLeft;
+		positionRight = newRight;
+	}
 }

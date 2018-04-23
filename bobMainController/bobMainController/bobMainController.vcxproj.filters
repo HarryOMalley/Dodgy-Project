@@ -30,6 +30,9 @@
     <ClInclude Include="IO.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Control.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="motorEncoders.h">
@@ -42,6 +45,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="IO.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="Control.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

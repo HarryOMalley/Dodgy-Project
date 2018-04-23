@@ -1,3 +1,4 @@
+#include <Encoder.h>
 #include <EEPROM.h>
 #define MOTOR_DIRECTION 0
 #define MOTOR_STATUS 1
@@ -14,6 +15,7 @@ int in3 = 7;
 int in4 = 6;
 char inString[20], inChar, exitString[] = "exit";
 int currentDirection, motorStatus, motorSpeed;
+Encoder encoder(2, 3);
 void setup()
 {
 	// set all the motor control pins to outputs
@@ -27,13 +29,13 @@ void setup()
 	currentDirection = EEPROM.read(MOTOR_DIRECTION);
 	motorStatus = EEPROM.read(MOTOR_STATUS);
 	motorSpeed = EEPROM.read(MOTOR_SPEED);
-	if (currentDirection == 0)
+	if ((currentDirection != 1) && currentDirection != 2)
 	{
 		currentDirection = 1;
 		EEPROM.write(MOTOR_DIRECTION, currentDirection);
 		Serial.println("Changed Motor Direction");
 	}
-	if (motorStatus == 0)
+	if ((motorStatus != 1) && (motorStatus != 2))
 	{
 		motorStatus = 1;
 		EEPROM.write(MOTOR_STATUS, motorStatus);
@@ -50,7 +52,7 @@ void setup()
 	Serial.println(motorStatus);
 	Serial.println(motorSpeed);
 }
-
+long position;
 void loop()
 {
 	int program;
@@ -62,6 +64,12 @@ void loop()
 	while (Serial.available() == 0)
 	{
 		motorRun();
+		long newposition = encoder.read();
+		if ((newposition - position > 100))
+		{
+			position = newposition;
+			Serial.println(position);
+		}
 	}
 }
 
@@ -194,13 +202,14 @@ void motorRun()
 	{
 		analogWrite(enA, motorSpeed);
 		analogWrite(enB, motorSpeed);
+
 		switch (currentDirection)
 		{
 		case 1: // right
 			digitalWrite(in1, HIGH); // turn on
 			digitalWrite(in2, LOW);
-			digitalWrite(in3, HIGH); // turn on
-			digitalWrite(in4, LOW);
+			digitalWrite(in3, LOW); // turn on
+			digitalWrite(in4, HIGH);
 			break;
 		case 2: // left
 			digitalWrite(in1, LOW); // turn on 

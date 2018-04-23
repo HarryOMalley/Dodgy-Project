@@ -61,6 +61,9 @@ Motors::Motors()
 	pinMode(in2, OUTPUT);
 	pinMode(in3, OUTPUT);
 	pinMode(in4, OUTPUT);
+	pinMode(pwm1, INPUT);
+	pinMode(pwm2, INPUT);
+	pinMode(pwm3, INPUT);
 	setup();
 	//motorEncoders encoder(); // work out how to fix the encoder problem before attempting this
 	//noInterrupts();
@@ -85,10 +88,10 @@ void Motors::run(int program)
 		motorReverse();
 		break;
 	case 4:
-		setDirection(0); // forwards
+		setDirection(1); // forwards
 		break;
 	case 5:
-		setDirection(1); // backwards
+		setDirection(0); // backwards
 		break;
 	case 6:
 		setSpeed();
@@ -97,9 +100,12 @@ void Motors::run(int program)
 		getStatus(); // get current speed etc.
 		break;
 	case 8:
+		//move(3); // right
 		turn(1);
 		break;
 	case 9:
+		//move(4); // left
+		turn(2);
 		break;
 	case 10:
 		break;
@@ -276,12 +282,12 @@ void Motors::turn(int direction)
 {
 	long rightReading, leftReading;
 	int turning = 1;
-	analogWrite(enA, 200);	// Temporarily change the speed
-	analogWrite(enB, 200); 
+	analogWrite(enA, 200);	// temporarily change the speed
+	analogWrite(enB, 200);
 	encoder.resetMotors(); // reset the encoders back to 0
-	if (direction == 0)
+	if (direction == 0) // right
 	{
-		while (turning == 1) 
+		while (turning == 1)
 		{
 			rightReading, leftReading = encoder.readMotors(); // reading the current value
 			if (leftReading < 300)
@@ -312,7 +318,7 @@ void Motors::turn(int direction)
 			delay(1);
 		}
 	}
-	else if (direction == 1)
+	else if (direction == 1) // left
 	{
 	
 		while (turning == 1)
@@ -409,14 +415,14 @@ void Motors::move(int direction)
 		digitalWrite(in2, HIGH);
 		digitalWrite(in3, HIGH); // turn on
 		digitalWrite(in4, LOW);
-		delay(1000);
+		delay(600);
 		break;
 	case 4: // turn left
 		digitalWrite(in1, HIGH); // turn on 
 		digitalWrite(in2, LOW);
 		digitalWrite(in3, LOW); // turn on
 		digitalWrite(in4, HIGH);
-		delay(1000);
+		delay(600);
 		break;
 	}
 }

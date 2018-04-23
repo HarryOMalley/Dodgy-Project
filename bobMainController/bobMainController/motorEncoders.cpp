@@ -2,8 +2,6 @@
 
 motorEncoders::motorEncoders()
 {
-	//Encoder motorRight(enc1, enc2);
-	//Encoder motorLeft(enc3, enc4);
 }
 
 motorEncoders::~motorEncoders()

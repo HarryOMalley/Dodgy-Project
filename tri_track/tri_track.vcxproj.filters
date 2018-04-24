@@ -27,9 +27,6 @@
     <ClInclude Include="arm.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="motors.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="classes.cpp">
@@ -39,9 +36,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="arm.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="motors.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

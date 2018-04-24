@@ -4,14 +4,16 @@
 
 #include "arm.h"
 
-arm::arm(int p1, int p2, int p3, int p4, int p5, int p6) {
+//arm::arm(int p1, int p2, int p3, int p4, int p5, int p6) {
+arm::arm(){  /*
   s1 = p1;
   s2 = p2;
   s3 = p3;
   s4 = p4;
   s5 = p5;
   s6 = p6; 
-  servoAttach();
+  Serial.println("arm constr");*/
+ // servoAttach();
 }
 
 int arm::servoRun(int program, int rotation) {
@@ -26,28 +28,29 @@ int arm::servoRun(int program) {
 		return 0;
 	}
 	if (program == 1) {
-		servoAttach();
+    compactMode();
 		saveState(program);
 	}
 	else if (program == 2) {
-		servoDetach();
-		saveState(program);
+    stabMode();
+  	saveState(program);
 	}
 	else if (program == 3) {
-		compactMode();
+		flickSwitch();
 		saveState(program);
 	}
 	else if (program == 4) {
-		stabMode();
+		servoAttach();
 		saveState(program);
 	}
 	else if (program == 5) {
-		flickSwitch();
+    servoDetatch();
 		saveState(program);
 	} 
 }
 
 void arm::servoAttach() {
+//  Serial.println("attach");
 	delay(100);
 	servo1.attach(s1);    // attaches the servo what voltn pin 9 to the servo object
 	servo2.attach(s2);
@@ -57,7 +60,7 @@ void arm::servoAttach() {
 	servo6.attach(s6);
 }
 
-void arm::servoDetach() {
+void arm::servoDetatch() {
 	delay(1000);
 	servo1.detach();    // attaches the servo what voltn pin 9 to the servo object
 	servo2.detach();
@@ -70,6 +73,8 @@ void arm::servoDetach() {
 // three stages
 // go back stop then slowly rest on the box and disable servos
 void arm::compactMode() {
+//  Serial.println("compact");
+  servoAttach();
 	servo1.write(90);
 	servo2.write(180);
 	servo3.write(30);
@@ -83,11 +88,12 @@ void arm::compactMode() {
 	servo4.write(20);
 	servo5.write(90);
 	servo6.write(90);
-	servoDetach();
+	servoDetatch();
 }
 
 // prepare servos for stabilisation
 void arm::stabMode() {
+  servoAttach();
 	servo1.write(90);
 	servo2.write(105);
 	servo3.write(140);
@@ -98,6 +104,9 @@ void arm::stabMode() {
 }
 
 void arm::flickSwitch() {
+  servoAttach();
+  stabMode(); // shouldnt need this but maybe?
+  delay(1000);
 	servo3.write(90); // lifts arm up out of the knob
 	delay(300);
 	servo1.write(60);
@@ -111,6 +120,7 @@ void arm::flickSwitch() {
 }
 
 void arm::rotate(int rotation) {
+  servoAttach();
 	if (rotation == 0) { // cw
 		servo6.write(90);
 		servo5.write(5);

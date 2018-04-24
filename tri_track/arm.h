@@ -11,11 +11,12 @@
 class arm {
 public:
 	//int* fillarr(int arr[])
-	arm(int, int, int, int, int, int);
+//	arm(int, int, int, int, int, int);
+	arm();
 	int servoRun(int);
 	int servoRun(int, int);
 	void servoAttach();
-	void servoDetach();
+	void servoDetatch();
 	void compactMode();
 	void stabMode();
 	void flickSwitch();
@@ -28,7 +29,13 @@ private:
 	Servo servo4;
 	Servo servo5;
 	Servo servo6;
-	int s1, s2, s3, s4, s5, s6 = -1;
+	//int s1, s2, s3, s4, s5, s6 = -1;
+  int s1 = 2;
+  int s2 = 3;
+  int s3 = 4;
+  int s4 = 5;
+  int s5 = 6;
+  int s6 = 7;
 	#define armState 21
 };
 

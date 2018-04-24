@@ -4,21 +4,24 @@
 
 #include "classes.h"
 
-IO::IO():  tri_track(2, 3, 4, 5, 6, 7) {}
+IO::IO()/*:  tri_track(2, 3, 4, 5, 6, 7)*/ {
+  //Serial.println("io constr");  
+  }
 /*	motor1.attach(8); // Attaches a pin to a servo.
 	motor2.attach(9);*/
 
 void IO::run()
 {
-  int newProgram = pulseIn(pwm1, HIGH);
-  int rotation = digitalRead(pwm2);
+  int newProgram = pulseIn(status, HIGH);
+  int rotation = 1;//pulseIn(pwm2, High);
   int check = digitalRead(pwm3);
+  Serial.println(check);
+//  Serial.println(newProgram);
+  
   if (check != 0) {
-    //Serial.print("input: ");
-    //Serial.println(newProgram);
-    if (newProgram > 500 && newProgram < 1500) // compact
-      tri_track.servoRun(1);
-    else if (newProgram > 1500 && newProgram < 2500) // stab
+    if (newProgram > 500 && newProgram < 1500){ // compact
+      tri_track.servoRun(3);
+    } else if (newProgram > 1500 && newProgram < 2500) // stab
       tri_track.servoRun(2);
     else if (newProgram > 2500 && newProgram < 3500) // flick
       tri_track.servoRun(3);
@@ -42,16 +45,16 @@ void IO::run()
   else
 	return 0;*/
 
-
+/*
 int IO::getSpeed()
 {
   /*int newSpeed;
     newSpeed = (pulseIn(pwm3, HIGH)) / 10;
-    return newSpeed;*/
-}
+    return newSpeed;
+}*/
 
 // location: where in eeprom
 // save: what to save
-void IO::updateEEPROM(int location, int save) {
+/*void IO::updateEEPROM(int location, int save) {
   EEPROM.write(motorSpeed, save);
-}
+}*/

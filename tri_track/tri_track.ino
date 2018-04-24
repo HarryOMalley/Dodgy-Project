@@ -3,7 +3,7 @@ Name:		tri-track.ino
 Created:	4/20/2018 02:46:27 AM
 Author:	kushalpankhania
 */
-#include "motors.h"
+//#include "motors.h"
 #include "classes.h"
 /*
 // pins used for ultrasonic sensors
@@ -37,12 +37,11 @@ Servo myservo5;
 Servo myservo6; // claw*/
 
 // global variables
-
 IO io;
 
 void setup() {
 	Serial.begin(9600);
-
+  Serial.println("setup");
 }
 
 void loop() {

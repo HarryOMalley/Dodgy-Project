@@ -16,9 +16,9 @@
 #define motorStatus 2
 
 // pwm pins
-#define pwm1 11
+#define status 11
 #define pwm2 12
-#define pwm3 13
+#define pwm3 12
 
 /*
 Servo motor1;
@@ -29,9 +29,9 @@ class IO
 {
 public:
 	IO();
-	void run();
+	void run();/*
 	int getSpeed();
-	void updateEEPROM(int location, int save);
+	void updateEEPROM(int location, int save);*/
 private:
 	int program;
 	arm tri_track;

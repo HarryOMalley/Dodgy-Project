@@ -12,7 +12,7 @@ Control::~Control()
 void Control::run()
 {
 	int newProgram;
-	newProgram = getInput();
+	//newProgram = getInput();
 	while (Serial.available() > 0)
 	{
 		Serial.println("recieved");
@@ -28,7 +28,7 @@ void Control::run()
 		Serial.print("Program: ");
 		Serial.println(program);
 	}
-	switch (program)
+	switch (newProgram)
 	{
 	case 1: // off
 		motors.motorOff();
@@ -49,24 +49,22 @@ void Control::run()
 		motors.setSpeed(getSpeed());
 		break;
 	case 7:
-		motors.getStatus(); // get current speed etc.
+		motors.turn(0);
 		break;
 	case 8:
-		//move(3); // right
 		motors.turn(1);
 		break;
 	case 9:
-		//move(4); // left
-		motors.turn(2);
+		motors.rotate(getRotation());
 		break;
 	case 10:
-		//while(1)
-			//encoders();
+		motors.getStatus(); // get current speed etc.
 		break;
 	default: // run the motors
-		//motors.run();
+		motors.run();
 		break;
 	}
+
 	return;
 }
 
@@ -109,6 +107,7 @@ int Control::getSpeed()
 	newSpeed = (pulseIn(pwm3, HIGH)) / 10;
 	return newSpeed;
 }
+
 
 void Control::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
 {

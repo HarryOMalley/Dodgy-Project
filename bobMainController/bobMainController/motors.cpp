@@ -18,6 +18,35 @@ Motors::~Motors()
 {
 }
 
+void Motors::setup()
+{
+	currentDirection = EEPROM.read(MOTOR_DIRECTION);
+	motorStatus = EEPROM.read(MOTOR_STATUS);
+	motorSpeed = EEPROM.read(MOTOR_SPEED);
+	if (currentDirection == 0)
+	{
+		currentDirection = 1;
+		EEPROM.write(MOTOR_DIRECTION, currentDirection);
+		Serial.println("Changed Motor Direction");
+	}
+	if (motorStatus == 0)
+	{
+		motorStatus = 1;
+		EEPROM.write(MOTOR_STATUS, motorStatus);
+		Serial.println("Changed Motor Status");
+	}
+	if (motorSpeed == 0)
+	{
+		motorSpeed = 100;
+		EEPROM.write(MOTOR_SPEED, motorSpeed);
+		Serial.println("Changed Motor Speed");
+	}
+	Serial.println("Current direction, status and speed are: ");
+	Serial.println(currentDirection);
+	Serial.println(motorStatus);
+	Serial.println(motorSpeed);
+}
+
 void Motors::run()
 {
 	if (motorStatus == 1) // if motor is supposed to be off, keep off
@@ -78,23 +107,6 @@ void Motors::setDirection(int direction)
 	updateEEPROM(motorSpeed, motorStatus, currentDirection);
 }
 
-void Motors::getStatus()
-{
-	Serial.print("Direction ");
-	if (currentDirection == 1)
-		Serial.println("forwards");
-	else
-		Serial.println("backwards");
-	Serial.print("Status ");
-	if (motorStatus == 1)
-		Serial.println("off");
-	else
-		Serial.println("on");
-	Serial.print("Speed");
-	Serial.println(motorSpeed);
-
-}
-
 void Motors::motorOn()
 {
 	motorStatus = 2;
@@ -118,80 +130,35 @@ void Motors::setSpeed(int newSpeed)
 	Serial.println(motorSpeed);
 }
 
-//void Motors::setSpeed()
-//{
-//	Serial.println("Input Speed: ");
-//	while (true)
-//	{
-//		if (Serial.available())
-//		{
-//			motorSpeed = Serial.parseInt();
-//			break;
-//		}
-//	}
-//	updateEEPROM(motorSpeed, motorStatus, currentDirection);
-//	Serial.println("Changed motor speed");
-//}
-
 void Motors::rotate()
 {
-	int rotation;
+	int angle = getRotation();
+	int direction = getRotationDirection();
+	float rotationRatio = 1.5;
+	int rightReading, leftReading, actualAngle, rotating = 1;
+
 	Serial.println("Input angle: ");
 	while (true)
 	{
 		if (Serial.available())
 		{
-			rotation = Serial.parseInt();
+			angle = Serial.parseInt();
 			break;
 		}
 	}
-	// INSERT CODE TO ROTATE A SPECIFIC AMOUNT USING ENCODERS
-	Serial.println("Changed motor speed");
-}
 
-void Motors::setup()
-{
-	currentDirection = EEPROM.read(MOTOR_DIRECTION);
-	motorStatus = EEPROM.read(MOTOR_STATUS);
-	motorSpeed = EEPROM.read(MOTOR_SPEED);
-	if (currentDirection == 0)
+	if (angle < 0)
 	{
-		currentDirection = 1;
-		EEPROM.write(MOTOR_DIRECTION, currentDirection);
-		Serial.println("Changed Motor Direction");
+		angle = -angle; //converting to positive
 	}
-	if (motorStatus == 0)
-	{
-		motorStatus = 1;
-		EEPROM.write(MOTOR_STATUS, motorStatus);
-		Serial.println("Changed Motor Status");
-	}
-	if (motorSpeed == 0)
-	{
-		motorSpeed = 100;
-		EEPROM.write(MOTOR_SPEED, motorSpeed);
-		Serial.println("Changed Motor Speed");
-	}
-	Serial.println("Current direction, status and speed are: ");
-	Serial.println(currentDirection);
-	Serial.println(motorStatus);
-	Serial.println(motorSpeed);
-}
-
-
-void Motors::turn(int direction)
-{
-	long rightReading, leftReading;
-	int turning = 1;
-	analogWrite(enA, 200);	// temporarily change the speed
-	analogWrite(enB, 200);
-	//resetMotors(); // reset the encoders back to 0
+	actualAngle = angle * rotationRatio;
 	if (direction == 0) // right
 	{
-		while (turning == 1)
+		while (rotating == 1)
 		{
-			rightReading, leftReading = readMotors(); // reading the current value
-			if (leftReading < 300)
+			rightReading = motorRight.read();
+			leftReading = motorLeft.read();
+			if (leftReading < actualAngle)
 			{
 				digitalWrite(in1, HIGH); // turn on
 				digitalWrite(in2, LOW);
@@ -201,7 +168,7 @@ void Motors::turn(int direction)
 				digitalWrite(in1, LOW); // turn off
 				digitalWrite(in2, LOW);
 			}
-			if (rightReading < 300)
+			if (rightReading > -actualAngle)
 			{
 				digitalWrite(in3, LOW); // turn on
 				digitalWrite(in4, HIGH);
@@ -211,21 +178,118 @@ void Motors::turn(int direction)
 				digitalWrite(in3, LOW); // turn off
 				digitalWrite(in4, LOW);
 			}
-			if (leftReading && rightReading > 299)
+			if ((leftReading > actualAngle) && (rightReading < -actualAngle))
+			{
+				rotating = 0;
+				Serial.println("Finished turning");
+				return;
+			}
+		}
+	}
+	else if (direction == 1) // left
+	{
+		while (rotating == 1)
+		{
+			rightReading = motorRight.read();
+			leftReading = motorLeft.read();
+			if (leftReading < actualAngle)
+			{
+				digitalWrite(in1, LOW); // turn on
+				digitalWrite(in2, HIGH);
+			}
+			else
+			{
+				digitalWrite(in1, LOW); // turn off
+				digitalWrite(in2, LOW);
+			}
+			if (rightReading > -actualAngle)
+			{
+				digitalWrite(in3, HIGH); // turn on
+				digitalWrite(in4, LOW);
+			}
+			else
+			{
+				digitalWrite(in3, LOW); // turn off
+				digitalWrite(in4, LOW);
+			}
+			if ((leftReading > actualAngle) && (rightReading < -actualAngle))
+			{
+				rotating = 0;
+				Serial.println("Finished turning");
+				return;
+			}
+		}
+	}
+	// INSERT CODE TO ROTATE A SPECIFIC AMOUNT USING ENCODERS
+	Serial.println("Changed motor speed");
+}
+
+int Motors::getRotation()
+{
+	int rotation;
+	rotation = (pulseIn(pwm3, HIGH)) / 10;
+	return rotation;
+}
+
+int Motors::getRotationDirection()
+{
+	int direction;
+	direction = digitalRead(pwm4);
+	return direction;
+}
+
+void Motors::turn(int direction) // uncalibrated turning, right, left and 180
+{
+	long rightReading, leftReading;
+	int turning = 1;
+	analogWrite(enA, 80);	// temporarily change the speed
+	analogWrite(enB, 80);
+	resetMotors(); // reset the encoders back to 0
+	if (direction == 0) // right
+	{
+		while (turning == 1)
+		{
+			rightReading = motorRight.read(); // reading the current value
+			leftReading = motorLeft.read();
+			//Serial.print(leftReading);
+			//Serial.print("  :  ");
+			//Serial.println(rightReading);
+			if (leftReading > -600)
+			{
+				digitalWrite(in1, HIGH); // turn on
+				digitalWrite(in2, LOW);
+			}
+			else
+			{
+				digitalWrite(in1, LOW); // turn off
+				digitalWrite(in2, LOW);
+			}
+			if (rightReading < 600)
+			{
+				digitalWrite(in3, LOW); // turn on
+				digitalWrite(in4, HIGH);
+			}
+			else
+			{
+				digitalWrite(in3, LOW); // turn off
+				digitalWrite(in4, LOW);
+			}
+			if ((leftReading > 599) && (rightReading < -599))
 			{
 				turning = 0;
-				break;
+				Serial.println("Finished turning");
+				return;
 			}
 			delay(1);
 		}
 	}
 	else if (direction == 1) // left
 	{
-	
+
 		while (turning == 1)
 		{
-//			rightReading, leftReading = readMotors(); // reading the current value
-			Serial.println(rightReading);
+			rightReading, leftReading = readMotors(); // reading the current value
+			//Serial.println(rightReading);
 			if (leftReading < 300)
 			{
 				digitalWrite(in1, LOW); // turn on
@@ -249,7 +313,8 @@ void Motors::turn(int direction)
 			if (leftReading && rightReading > 299)
 			{
 				turning = 0;
-				break;
+				Serial.println("Finished turning");
+				return;
 			}
 			delay(1);
 		}
@@ -258,7 +323,7 @@ void Motors::turn(int direction)
 	{
 		while (turning == 1)
 		{
-//			rightReading, leftReading = readMotors(); // reading the current value
+			rightReading, leftReading = readMotors(); // reading the current value
 			Serial.println(rightReading);
 			if (leftReading < 600)
 			{
@@ -283,7 +348,8 @@ void Motors::turn(int direction)
 			if (leftReading && rightReading > 299)
 			{
 				turning = 0;
-				break;
+				Serial.println("Finished turning");
+				return;
 			}
 			delay(1);
 		}
@@ -291,7 +357,7 @@ void Motors::turn(int direction)
 	Serial.println("Finished Turning");
 }
 
-void Motors::move(int direction)
+void Motors::move(int direction) // preprogrammed durations to turn, obsolete
 {
 	analogWrite(enA, motorSpeed);
 	analogWrite(enB, motorSpeed);
@@ -335,23 +401,36 @@ void Motors::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
 	EEPROM.write(MOTOR_DIRECTION, currentDirection);
 }
 
-//long Motors::readMotors()
-//{
-//	long newRight, newLeft;
-//	newRight = motorRight.read();
-//	newLeft = motorLeft.read();
-//	Serial.print("Read Encoders ");
-//	Serial.print(newRight);
-//	Serial.println(newLeft);
-//	return newLeft, newRight;
-//}
-//
-//void Motors::resetMotors()
-//{
-//	motorRight.write(0);
-//	motorLeft.write(0);
-//	Serial.println("Reset the motors");
-//}
+long Motors::readMotors()
+{
+	long rightReading, leftReading;
+	rightReading = motorRight.read();
+	leftReading = motorLeft.read();
+	return rightReading, leftReading;
+}
+
+void Motors::resetMotors()
+{
+	motorRight.write(0);
+	motorLeft.write(0);
+	Serial.println("Reset the motors");
+}
+
+void Motors::getStatus()
+{
+	Serial.print("Direction ");
+	if (currentDirection == 1)
+		Serial.println("forwards");
+	else
+		Serial.println("backwards");
+	Serial.print("Status ");
+	if (motorStatus == 1)
+		Serial.println("off");
+	else
+		Serial.println("on");
+	Serial.print("Speed");
+	Serial.println(motorSpeed);
+}
 
 void writeEEPROM(int location, int data)
 {

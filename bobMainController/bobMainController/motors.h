@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <Encoder.h>
 #include "config.h"
-
+extern Encoder motorRight, motorLeft;
 class Motors
 {
 public:
@@ -13,20 +13,23 @@ public:
 	void setup();
 	void run();
 	void motorOff();
-	void setSpeed(int newSpeed);
+	void setSpeed(int);
 	void motorOn();
 	void motorReverse();
-	void setDirection(int direction);
+	void setDirection(int);
 	void getStatus();
 	void turn(int);
 	void rotate();
+	int getRotation();
+	int getRotationDirection();
 	void move(int);
-	void updateEEPROM(int motorSpeed, int motorStatus, int currentDirection);
+	void updateEEPROM(int, int, int);
 	long readMotors();
 	void resetMotors();
 private:
 	int currentDirection;
 	int motorStatus;
 	int motorSpeed;
+	
 	//Encoder motorRight, motorLeft;
 };

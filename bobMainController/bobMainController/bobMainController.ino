@@ -19,39 +19,4 @@ void setup()
 void loop()
 {
 	control.run();
-	/*if (encoderRun == 1)
-	{
-		int encoderRight, encoderLeft;
-		encoderRight, encoderLeft = encoders();
-		encoderRun = control.run(encoderRight, encoderLeft);
-	}
-	else if (encoderRun == 2)
-	{
-		encoderReset();
-		encoderRun = 0;
-	}
-	else
-		encoderRun = control.run();*/
-}
-
-int encoders()
-{
-	int newRight = motorRight.read();
-	int newLeft = motorLeft.read();
-	return newRight, newLeft;
-	// if (newLeft != positionLeft || newRight != positionRight) {
-	// 	Serial.print("Left = ");
-	// 	Serial.print(newLeft);
-	// 	Serial.print(", Right = ");
-	// 	Serial.print(newRight);
-	// 	Serial.println();
-	// 	positionLeft = newLeft;
-	// 	positionRight = newRight;
-	// }
-}
-
-void encoderReset()
-{
-	motorRight.write(0);
-	motorLeft.write(0);
 }

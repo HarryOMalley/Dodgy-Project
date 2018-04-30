@@ -12,7 +12,7 @@ Control::~Control()
 void Control::run()
 {
 	int newProgram;
-	//newProgram = getInput();
+	newProgram = getInput();
 	while (Serial.available() > 0)
 	{
 		Serial.println("recieved");
@@ -49,16 +49,19 @@ void Control::run()
 		motors.setSpeed(getSpeed());
 		break;
 	case 7:
-		motors.turn(0);
+		motors.rotate(0); // right
 		break;
 	case 8:
-		motors.turn(1);
+		motors.rotate(1); // left
 		break;
 	case 9:
-		motors.rotate(getRotation());
+		motors.rotate(); // different angle
 		break;
 	case 10:
 		motors.getStatus(); // get current speed etc.
+		break;
+	case 11:
+		motors.calibrate();
 		break;
 	default: // run the motors
 		motors.run();
@@ -105,6 +108,7 @@ int Control::getSpeed()
 {
 	int newSpeed;
 	newSpeed = (pulseIn(pwm3, HIGH)) / 10;
+	Serial.println(newSpeed);
 	return newSpeed;
 }
 

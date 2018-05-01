@@ -23,9 +23,9 @@ http://arduino.esp8266.com/stable/package_esp8266com_index.json
 
 // Update these with values suitable for your network.
 
-const char* ssid = "........";
-const char* password = "........";
-const char* mqtt_server = "broker.mqtt-dashboard.com";
+const char* ssid = "Dodgy Wifi";
+const char* password = "";
+const char* mqtt_server = "192.168.1.5";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
@@ -104,7 +104,7 @@ void reconnect() {
 
 void setup() {
 	pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
-	Serial.begin(115200);
+	Serial.begin(9600);
 	setup_wifi();
 	client.setServer(mqtt_server, 1883);
 	client.setCallback(callback);
@@ -124,6 +124,6 @@ void loop() {
 		snprintf(msg, 75, "hello world #%ld", value);
 		Serial.print("Publish message: ");
 		Serial.println(msg);
-		client.publish("outTopic", msg);
+		client.publish("Bridge", msg);
 	}
 }

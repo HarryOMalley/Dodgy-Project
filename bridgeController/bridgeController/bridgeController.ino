@@ -3,7 +3,9 @@
  Created:	4/18/2018 1:55:48 PM
  Author:	harryomalley
 */
-
+#include <ESP8266WiFi.h>
+#include <PubSubClient.h>
+#include <Wire.h>
 #include <EEPROM.h>
 #define MOTOR_DIRECTION 0
 #define MOTOR_STATUS 1
@@ -20,46 +22,63 @@ int in3 = 7;
 int in4 = 6;
 char inString[20], inChar, exitString[] = "exit";
 int currentDirection, motorStatus, motorSpeed;
+
+// Connect to the WiFi
+const char* ssid = "Dodgy Wifi";
+const char* password = "";
+const char* mqtt_server = "192.168.1.5";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+
 void setup()
 {
 	// set all the motor control pins to outputs
-	pinMode(enA, OUTPUT);
-	pinMode(enB, OUTPUT);
+	/*pinMode(enA, OUTPUT);
 	pinMode(in1, OUTPUT);
-	pinMode(in2, OUTPUT);
-	pinMode(in3, OUTPUT);
-	pinMode(in4, OUTPUT);
-	Serial.begin(9600);
-	currentDirection = EEPROM.read(MOTOR_DIRECTION);
-	motorStatus = EEPROM.read(MOTOR_STATUS);
-	motorSpeed = EEPROM.read(MOTOR_SPEED);
-	if (currentDirection == 0)
-	{
-		currentDirection = 1;
-		EEPROM.write(MOTOR_DIRECTION, currentDirection);
-		Serial.println("Changed Motor Direction");
-	}
-	if (motorStatus == 0)
-	{
-		motorStatus = 1;
-		EEPROM.write(MOTOR_STATUS, motorStatus);
-		Serial.println("Changed Motor Status");
-	}
-	if (motorSpeed == 0)
-	{
-		motorSpeed = 100;
-		EEPROM.write(MOTOR_SPEED, motorSpeed);
-		Serial.println("Changed Motor Speed");
-	}
+	pinMode(in2, OUTPUT);*/
+	//Serial.begin(9600);
+	//currentDirection = EEPROM.read(MOTOR_DIRECTION);
+	//motorStatus = EEPROM.read(MOTOR_STATUS);
+	//motorSpeed = EEPROM.read(MOTOR_SPEED);
+	//if (currentDirection == 0)
+	//{
+	//	currentDirection = 1;
+	//	EEPROM.write(MOTOR_DIRECTION, currentDirection);
+	//	Serial.println("Changed Motor Direction");
+	//}
+	//if (motorStatus == 0)
+	//{
+	//	motorStatus = 1;
+	//	EEPROM.write(MOTOR_STATUS, motorStatus);
+	//	Serial.println("Changed Motor Status");
+	//}
+	//if (motorSpeed == 0)
+	//{
+	//	motorSpeed = 100;
+	//	EEPROM.write(MOTOR_SPEED, motorSpeed);
+	//	Serial.println("Changed Motor Speed");
+	//}
 	Serial.println("Current direction, status and speed are: ");
-	Serial.println(currentDirection);
-	Serial.println(motorStatus);
-	Serial.println(motorSpeed);
+	//Serial.println(currentDirection);
+	//Serial.println(motorStatus);
+	//Serial.println(motorSpeed);
+
+	client.setServer(mqtt_server, 1883);
+	client.setCallback(callback);
+
 }
 
 void loop()
 {
-	int program;
+	if (!client.connected())
+	{
+		reconnect();
+	}
+	client.loop();
+
+
+	/*int program;
 	while (Serial.available() > 0)
 	{
 		program = Serial.parseInt();
@@ -68,7 +87,7 @@ void loop()
 	while (Serial.available() == 0)
 	{
 		motorRun();
-	}
+	}*/
 }
 
 void motor(int program)
@@ -247,4 +266,66 @@ void updateEEPROM()
 	EEPROM.write(MOTOR_SPEED, motorSpeed);
 	EEPROM.write(MOTOR_STATUS, motorStatus);
 	EEPROM.write(MOTOR_DIRECTION, currentDirection);
+}
+
+void reconnect()
+{
+	// Loop until we're reconnected
+	while (!client.connected())
+	{
+		Serial.print("Attempting MQTT connection...");
+		// Attempt to connect
+		if (client.connect("ESP8266"))
+		{
+			Serial.println("connected");
+			// ... and subscribe to topic
+			client.subscribe("Bridge");
+		}
+		else
+		{
+			Serial.print("failed, rc=");
+			Serial.print(client.state());
+			Serial.println(" try again in 5 seconds");
+			// Wait 5 seconds before retrying
+			delay(5000);
+		}
+	}
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+	Serial.print("Message arrived [");
+	Serial.print(topic);
+	Serial.print("] ");
+	for (int i = 0; i < length; i++) {
+		char receivedChar = (char)payload[i];
+		Serial.print(receivedChar);
+		if (receivedChar == '0')
+			motor(0);
+		if (receivedChar == '1')
+			motor(1);
+	}
+	Serial.println();
+}
+
+void setup_wifi() {
+
+	delay(10);
+	// We start by connecting to a WiFi network
+	Serial.println();
+	Serial.print("Connecting to ");
+	Serial.println(ssid);
+
+	WiFi.begin(ssid, password);
+
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(500);
+		Serial.print(".");
+	}
+
+	randomSeed(micros());
+
+	Serial.println("");
+	Serial.println("WiFi connected");
+	Serial.println("IP address: ");
+	Serial.println(WiFi.localIP());
 }

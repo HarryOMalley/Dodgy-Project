@@ -2,9 +2,9 @@
 
 #include <EEPROM.h>
 #include <Arduino.h>
-#include <Encoder.h>
+#include "motorEncoders.h"
 #include "config.h"
-extern Encoder motorRight, motorLeft;
+
 class Motors
 {
 public:
@@ -22,17 +22,11 @@ public:
 	int getRotation();
 	int getRotationDirection();
 	void updateEEPROM(int motorSpeed, int motorStatus, int currentDirection);
-	long readMotors();
-	void resetMotors();
 	void getStatus();
-	int motorSpeedRight();
-	int motorSpeedLeft();
 	void calibrate(void);
 private:
 	int currentDirection;
 	int motorStatus;
 	int motorSpeed;
-	int rightMotorAnalogue;
-	int leftMotorAnalogue;
-	//Encoder motorRight, motorLeft;
+	motorEncoders encoders;
 };

@@ -11,9 +11,8 @@ Motors::Motors()
 	pinMode(pwm1, INPUT);
 	pinMode(pwm2, INPUT);
 	pinMode(pwm3, INPUT);
-	rightMotorAnalogue = 0;
-	leftMotorAnalogue = 0;
 	setup();
+	motorEncoders encoders();
 }
 
 Motors::~Motors()
@@ -43,7 +42,6 @@ void Motors::setup()
 		EEPROM.write(MOTOR_SPEED, motorSpeed);
 		Serial.println("Changed Motor Speed");
 	}
-	Serial.flush();
 	Serial.println("Current direction, status and speed are: ");
 	Serial.println(currentDirection);
 	Serial.println(motorStatus);
@@ -136,21 +134,21 @@ void Motors::setSpeed(int newSpeed)
 
 void Motors::rotate(int direction)
 {
-	resetMotors();
+	encoders.reset();
 	analogWrite(enA, 120);
 	analogWrite(enB, 120);
 	float rotationRatio = 1.5; // NEED TO CALIBRATE
-	int rightReading, leftReading, actualAngle, rotating = 1;
+	int actualAngle, rotating = 1;
+	readings readings; // struct of encoder readings that will be returned
 
 	if (direction == 0) // right
 	{
 		while (rotating == 1)
 		{
-			rightReading = motorRight.read();
-			leftReading = motorLeft.read();
-			Serial.println(rightReading);
-			Serial.println(leftReading);
-			if (leftReading < 300) // work out what this should atually be
+			readings = encoders.read();
+			Serial.println(readings.right);
+			Serial.println(readings.left);
+			if (readings.left < 300) // work out what this should atually be
 			{
 				digitalWrite(in1, LOW); // turn on
 				digitalWrite(in2, HIGH);
@@ -160,7 +158,7 @@ void Motors::rotate(int direction)
 				digitalWrite(in1, LOW); // turn off
 				digitalWrite(in2, LOW);
 			}
-			if (rightReading > -300)
+			if (readings.right > -300)
 			{
 				digitalWrite(in3, HIGH); // turn on
 				digitalWrite(in4, LOW);
@@ -170,7 +168,7 @@ void Motors::rotate(int direction)
 				digitalWrite(in3, LOW); // turn off
 				digitalWrite(in4, LOW);
 			}
-			if ((leftReading > 300) && (rightReading < -300))
+			if ((readings.left > 300) && (readings.right < -300))
 			{
 				rotating = 0;
 				Serial.println("Finished turning");
@@ -183,9 +181,8 @@ void Motors::rotate(int direction)
 	{
 		while (rotating == 1)
 		{
-			rightReading = motorRight.read();
-			leftReading = motorLeft.read();
-			if (leftReading > -300)
+			readings = encoders.read();
+			if (readings.left > -300)
 			{
 				digitalWrite(in1, HIGH); // turn on
 				digitalWrite(in2, LOW);
@@ -195,7 +192,7 @@ void Motors::rotate(int direction)
 				digitalWrite(in1, LOW); // turn off
 				digitalWrite(in2, LOW);
 			}
-			if (rightReading < 300)
+			if (readings.right < 300)
 			{
 				digitalWrite(in3, LOW); // turn on
 				digitalWrite(in4, HIGH);
@@ -205,7 +202,7 @@ void Motors::rotate(int direction)
 				digitalWrite(in3, LOW); // turn off
 				digitalWrite(in4, LOW);
 			}
-			if ((leftReading < -300) && (rightReading > 300))
+			if ((readings.left < -300) && (readings.right > 300))
 			{
 				rotating = 0;
 				Serial.println("Finished turning");
@@ -218,7 +215,7 @@ void Motors::rotate(int direction)
 
 void Motors::rotate()
 {
-	resetMotors();
+	encoders.reset();
 	int angle = getRotation();
 	int direction;
 	//int direction = getRotationDirection();
@@ -339,21 +336,6 @@ void Motors::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
 	EEPROM.write(MOTOR_DIRECTION, currentDirection);
 }
 
-long Motors::readMotors()
-{
-	long rightReading, leftReading;
-	rightReading = motorRight.read();
-	leftReading = motorLeft.read();
-	return rightReading, leftReading;
-}
-
-void Motors::resetMotors()
-{
-	motorRight.write(0);
-	motorLeft.write(0);
-	Serial.println("Reset the motors");
-}
-
 void Motors::getStatus()
 {
 	Serial.print("Direction ");
@@ -370,21 +352,9 @@ void Motors::getStatus()
 	Serial.println(motorSpeed);
 }
 
-int Motors::motorSpeedRight()
-{
-	int calibratedSpeed = motorSpeed + rightMotorAnalogue;
-	return calibratedSpeed;
-}
-
-int Motors::motorSpeedLeft()
-{
-	int calibratedSpeed = motorSpeed + leftMotorAnalogue;
-	return calibratedSpeed;
-}
-
 void Motors::calibrate(void)
 {
-	resetMotors();
+	encoders.reset();
 	bool calibrating = true;
 	float currentTime, newTime, timeDelta, rightReading, leftReading, newRightReading, newLeftReading, rpmRight, rpmLeft;
 	analogWrite(enA, motorSpeedRight());

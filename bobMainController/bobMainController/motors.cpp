@@ -25,13 +25,13 @@ void Motors::setup()
 	currentDirection = EEPROM.read(MOTOR_DIRECTION);
 	motorStatus = EEPROM.read(MOTOR_STATUS);
 	motorSpeed = EEPROM.read(MOTOR_SPEED);
-	if (currentDirection == 0)
+	if ((currentDirection != 1) || (currentDirection != 2))
 	{
 		currentDirection = 1;
 		EEPROM.write(MOTOR_DIRECTION, currentDirection);
 		Serial.println("Changed Motor Direction");
 	}
-	if (motorStatus == 0)
+	if ((motorStatus != 1) || (motorStatus != 2))
 	{
 		motorStatus = 1;
 		EEPROM.write(MOTOR_STATUS, motorStatus);
@@ -43,6 +43,7 @@ void Motors::setup()
 		EEPROM.write(MOTOR_SPEED, motorSpeed);
 		Serial.println("Changed Motor Speed");
 	}
+	Serial.flush();
 	Serial.println("Current direction, status and speed are: ");
 	Serial.println(currentDirection);
 	Serial.println(motorStatus);

@@ -46,7 +46,7 @@ void Control::run()
 		motors.setDirection(0); // backwards
 		break;
 	case 6:
-		motors.setSpeed(getSpeed());
+		motors.setSpeed(100);
 		break;
 	case 7:
 		motors.rotate(0); // right

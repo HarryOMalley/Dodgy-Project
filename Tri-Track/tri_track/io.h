@@ -1,4 +1,4 @@
-// classes.h
+// io.h
 
 #ifndef _CLASSES_h
 #define _CLASSES_h
@@ -32,6 +32,8 @@ public:
 	void run();/*
 	int getSpeed();
 	void updateEEPROM(int location, int save);*/
+  bool busy;
+  int manualProgram;
 private:
 	int program;
 	arm tri_track;

@@ -11,6 +11,7 @@ public:
 	void run();
 	int getInput();
 	int getSpeed();
+	int getRotation();
 	void updateEEPROM(int motorSpeed, int motorStatus, int currentDirection);
 	long readMotors();
 	void resetMotors();

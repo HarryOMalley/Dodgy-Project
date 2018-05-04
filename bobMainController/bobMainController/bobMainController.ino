@@ -9,7 +9,8 @@
 Encoder motorRight(enc1, enc2);
 Encoder motorLeft(enc3, enc4);
 Control control;
-int currentDirection, motorStatus, motorSpeed, program, positionRight, positionLeft;
+int currentDirection, motorStatus, motorSpeed, program, positionRight, encoderRun, positionLeft;
+
 void setup()
 {
 	Serial.begin(9600);
@@ -17,23 +18,5 @@ void setup()
 
 void loop()
 {
-	int newProgram;
 	control.run();
-	encoders();
-}
-
-void encoders()
-{
-	int newRight = motorRight.read();
-	int newLeft = motorLeft.read();
-	
-	if (newLeft != positionLeft || newRight != positionRight) {
-		Serial.print("Left = ");
-		Serial.print(newLeft);
-		Serial.print(", Right = ");
-		Serial.print(newRight);
-		Serial.println();
-		positionLeft = newLeft;
-		positionRight = newRight;
-	}
 }

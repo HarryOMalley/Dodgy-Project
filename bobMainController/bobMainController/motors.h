@@ -2,7 +2,7 @@
 
 #include <EEPROM.h>
 #include <Arduino.h>
-#include <Encoder.h>
+#include "motorEncoders.h"
 #include "config.h"
 
 class Motors
@@ -12,21 +12,21 @@ public:
 	~Motors();
 	void setup();
 	void run();
-	void motorOff();
-	void setSpeed(int newSpeed);
-	void motorOn();
 	void motorReverse();
 	void setDirection(int direction);
-	void getStatus();
-	void turn(int);
+	void motorOn();
+	void motorOff();
+	void setSpeed(int newSpeed);
+	void rotate(int direction);
 	void rotate();
-	void move(int);
+	int getRotation();
+	int getRotationDirection();
 	void updateEEPROM(int motorSpeed, int motorStatus, int currentDirection);
-	long readMotors();
-	void resetMotors();
+	void getStatus();
+	void calibrate(void);
 private:
 	int currentDirection;
 	int motorStatus;
 	int motorSpeed;
-	//Encoder motorRight, motorLeft;
+	motorEncoders encoders;
 };

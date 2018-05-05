@@ -3,6 +3,7 @@
 Control::Control()
 {
 	program = 0;
+	motorSpeed = 100;
 }
 
 Control::~Control()
@@ -28,7 +29,7 @@ void Control::run()
 		Serial.print("Program: ");
 		Serial.println(program);
 	}
-	switch (program)
+	switch (newProgram)
 	{
 	case 1: // off
 		motors.motorOff();
@@ -46,25 +47,28 @@ void Control::run()
 		motors.setDirection(0); // backwards
 		break;
 	case 6:
-		motors.setSpeed(getSpeed());
+		motorSpeed += 20;
+		motors.setSpeed(motorSpeed);
 		break;
 	case 7:
-		motors.getStatus(); // get current speed etc.
+		motorSpeed -= 20;
+		motors.setSpeed(motorSpeed);
+		//motors.rotate(0); // right
 		break;
 	case 8:
-		//move(3); // right
-		motors.turn(1);
+		motors.rotate(1); // left
 		break;
 	case 9:
-		//move(4); // left
-		motors.turn(2);
+		motors.rotate(); // different angle
 		break;
 	case 10:
-		//while(1)
-			//encoders();
+		motors.getStatus(); // get current speed etc.
+		break;
+	case 11:
+		//motors.calibrate();
 		break;
 	default: // run the motors
-		//motors.run();
+		motors.run();
 		break;
 	}
 	return;
@@ -107,8 +111,10 @@ int Control::getSpeed()
 {
 	int newSpeed;
 	newSpeed = (pulseIn(pwm3, HIGH)) / 10;
+	Serial.println(newSpeed);
 	return newSpeed;
 }
+
 
 void Control::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
 {

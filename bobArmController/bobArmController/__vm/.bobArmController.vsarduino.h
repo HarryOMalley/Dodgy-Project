@@ -69,7 +69,8 @@ typedef void *__builtin_va_list;
 #undef PSTR
 #define PSTR(string_literal) ((const PROGMEM char *)(string_literal))
 
-typedef unsigned char uint8_t;
+//typedef unsigned char uint8_t;
+//typedef unsigned int uint8_t;
 
 #define pgm_read_byte(address_short) uint8_t() 
 #define pgm_read_word(address_short) uint16_t() 
@@ -77,6 +78,6 @@ typedef unsigned char uint8_t;
 #define pgm_read_float(address_short) float()
 #define pgm_read_ptr(address_short)   short()
 
-#include "bridgeController.ino"
+#include "bobArmController.ino"
 #endif
 #endif

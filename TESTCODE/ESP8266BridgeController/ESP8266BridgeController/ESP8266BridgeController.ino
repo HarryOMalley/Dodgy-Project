@@ -321,6 +321,30 @@ void callback(char* topic, byte* payload, unsigned int length) {
 		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
 		motor(1);
 	}
+	else if ((char)payload[0] == '2')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motorSpeed = 255;
+		updateEEPROM();
+		delay(100);
+		digitalWrite(BUILTIN_LED, HIGH);
+		delay(100);
+		digitalWrite(BUILTIN_LED, LOW);
+		delay(100);
+		digitalWrite(BUILTIN_LED, HIGH);
+		delay(100);
+		digitalWrite(BUILTIN_LED, LOW);
+	}
+	else if ((char)payload[0] == '3')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motor(3);
+	}
+	else if ((char)payload[0] == '4')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motor(4);
+	}
 }
 void setup_wifi() {
 

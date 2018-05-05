@@ -4,32 +4,47 @@
  Author:	harryomalley
 */
 
+#include <WiFi.h>
+#include <PubSubClient.h>
 #include <EEPROM.h>
+#include <esp32-hal-ledc.h>
 #define MOTOR_DIRECTION 0
 #define MOTOR_STATUS 1
 #define MOTOR_SPEED 2
+#define BUILTIN_LED 2
+
 int addr = 0; // Current address in the EEPROM
 			  // connect motor controller pins to Arduino digital pins
 // motor one
-int enA = 10;
-int in1 = 9;
-int in2 = 8;
-// motor two
-int enB = 5;
-int in3 = 7;
-int in4 = 6;
+int enA = 16;
+int in1 = 5;
+int in2 = 4;
 char inString[20], inChar, exitString[] = "exit";
 int currentDirection, motorStatus, motorSpeed;
+
+// Wifi Settings
+const char* ssid = "Dodgy Wifi";
+const char* password = "";
+const char* mqtt_server = "192.168.1.5";
+
+WiFiClient espClient;
+PubSubClient client(espClient);
+long lastMsg = 0;
+char msg[50];
+int value = 0;
+// for pwm - using LEDC rather than analogWrite
+int freq = 5000;
+int ledChannel = 0;
+int resolution = 8;
+ledcAttachPin(enA, 0);
 void setup()
 {
+	Serial.begin(9600);
+	Serial.println("Setting up");
 	// set all the motor control pins to outputs
 	pinMode(enA, OUTPUT);
-	pinMode(enB, OUTPUT);
 	pinMode(in1, OUTPUT);
 	pinMode(in2, OUTPUT);
-	pinMode(in3, OUTPUT);
-	pinMode(in4, OUTPUT);
-	Serial.begin(9600);
 	currentDirection = EEPROM.read(MOTOR_DIRECTION);
 	motorStatus = EEPROM.read(MOTOR_STATUS);
 	motorSpeed = EEPROM.read(MOTOR_SPEED);
@@ -55,11 +70,36 @@ void setup()
 	Serial.println(currentDirection);
 	Serial.println(motorStatus);
 	Serial.println(motorSpeed);
+	motorSpeed = 255;
+	currentDirection = 1;
+	motorStatus = 1;
+	pinMode(BUILTIN_LED, OUTPUT);     // Initialize the BUILTIN_LED pin as an output
+	setup_wifi();
+	client.setServer(mqtt_server, 1883);
+	client.setCallback(callback);
+
 }
 
 void loop()
 {
-	int program;
+	if (!client.connected()) 
+	{
+		reconnect();
+	}
+	client.loop();
+	motorRun();
+	//long now = millis();
+	//if (now - lastMsg > 2000) {
+	//	lastMsg = now;
+	//	++value;
+	//	snprintf(msg, 75, "hello world #%ld", value);
+	//	Serial.print("Publish message: ");
+	//	Serial.println(msg);
+	//	client.publish("Bridge", msg);
+	//}
+}
+
+	/*int program;
 	while (Serial.available() > 0)
 	{
 		program = Serial.parseInt();
@@ -68,11 +108,11 @@ void loop()
 	while (Serial.available() == 0)
 	{
 		motorRun();
-	}
-}
+	}*/
 
 void motor(int program)
 {
+	Serial.println(motorStatus);
 	switch (program)
 	{
 	case 0: // off
@@ -176,27 +216,20 @@ void motorRun()
 	{
 		digitalWrite(in1, LOW); // turn off
 		digitalWrite(in2, LOW);
-		digitalWrite(in3, LOW); // turn off
-		digitalWrite(in4, LOW);
 		return;
 	}
 	else
 	{
-		analogWrite(enA, motorSpeed);
-		analogWrite(enB, motorSpeed);
+		analogWrite(enA, 255);
 		switch (currentDirection)
 		{
 		case 1: // right
 			digitalWrite(in1, HIGH); // turn on
 			digitalWrite(in2, LOW);
-			digitalWrite(in3, HIGH); // turn on
-			digitalWrite(in4, LOW);
 			break;
 		case 2: // left
 			digitalWrite(in1, LOW); // turn on 
 			digitalWrite(in2, HIGH);
-			digitalWrite(in3, HIGH); // turn on
-			digitalWrite(in4, LOW);
 			break;
 		default:
 			// do nothing
@@ -247,4 +280,98 @@ void updateEEPROM()
 	EEPROM.write(MOTOR_SPEED, motorSpeed);
 	EEPROM.write(MOTOR_STATUS, motorStatus);
 	EEPROM.write(MOTOR_DIRECTION, currentDirection);
+}
+
+void reconnect() {
+	// Loop until we're reconnected
+	while (!client.connected()) {
+		Serial.print("Attempting MQTT connection...");
+		// Create a random client ID
+		String clientId = "ESP8266Client-";
+		clientId += String(random(0xffff), HEX);
+		// Attempt to connect
+		if (client.connect(clientId.c_str())) {
+			Serial.println("connected");
+			// Once connected, publish an announcement...
+			client.publish("BridgeOut", "hello world");
+			// ... and resubscribe
+			client.subscribe("Bridge");
+		}
+		else {
+			Serial.print("failed, rc=");
+			Serial.print(client.state());
+			Serial.println(" try again in 5 seconds");
+			// Wait 5 seconds before retrying
+			delay(5000);
+		}
+	}
+}
+
+void callback(char* topic, byte* payload, unsigned int length) {
+	Serial.print("Message arrived [");
+	Serial.print(topic);
+	Serial.print("] ");
+	for (int i = 0; i < length; i++) {
+		Serial.print((char)payload[i]);
+	}
+	Serial.println();
+
+	// Switch on the LED if an 1 was received as first character
+	if ((char)payload[0] == '0') 
+	{
+		digitalWrite(BUILTIN_LED, HIGH);   // Turn the LED on (Note that LOW is the voltage level
+		motor(0);							  // but actually the LED is on; this is because
+										  // it is acive low on the ESP-01)
+	}
+	else if ((char)payload[0] == '1')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motorSpeed = 255;
+		updateEEPROM();
+		delay(100);
+		digitalWrite(BUILTIN_LED, HIGH);
+		delay(100);
+		digitalWrite(BUILTIN_LED, LOW);
+		delay(100);
+		digitalWrite(BUILTIN_LED, HIGH);
+		delay(100);
+		digitalWrite(BUILTIN_LED, LOW);
+	}
+	else if ((char)payload[0] == '2')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motor(1);
+	}
+	else if ((char)payload[0] == '3')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motor(3);
+	}
+	else if ((char)payload[0] == '4')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motor(4);
+	}
+}
+void setup_wifi() {
+
+	delay(10);
+	// We start by connecting to a WiFi network
+	Serial.println();
+	Serial.print("Connecting to ");
+	Serial.println(ssid);
+
+	WiFi.begin(ssid, password);
+
+	while (WiFi.status() != WL_CONNECTED) {
+		delay(500);
+		Serial.print(".");
+	}
+
+	randomSeed(micros());
+
+	Serial.println("");
+	Serial.println("WiFi connected");
+	Serial.println("IP address: ");
+	Serial.println(WiFi.localIP());
 }

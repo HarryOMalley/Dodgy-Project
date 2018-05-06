@@ -10,8 +10,6 @@
 
 class arm {
 public:
-	//int* fillarr(int arr[])
-//	arm(int, int, int, int, int, int);
 	arm();
 	int servoRun(int);
 	int servoRun(int, int);

@@ -1,4 +1,4 @@
-// io.h
+// control.h
 
 #ifndef _CLASSES_h
 #define _CLASSES_h
@@ -8,11 +8,11 @@
 #include "arm.h"
 #include <EEPROM.h>
 
-// eeprom memory locations
+// eeprom memory locatcontrolns
 // motor variables
 // move to motor header file
 #define motorSpeed 0
-#define motorDirection 1
+#define motorDirectcontroln 1
 #define motorStatus 2
 
 // pwm pins
@@ -25,13 +25,13 @@ Servo motor1;
 Servo motor2;
 */
 
-class IO
+class control
 {
 public:
-	IO();
+	control();
 	void run();/*
 	int getSpeed();
-	void updateEEPROM(int location, int save);*/
+	void updateEEPROM(int locatcontroln, int save);*/
   bool busy;
   int manualProgram;
 private:

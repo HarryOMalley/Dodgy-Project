@@ -1,10 +1,19 @@
 #include "Control.h"
+USB Usb;
+XBOXRECV Xbox(&Usb);
 
 Control::Control()
 {
 	program = 0;
 	motorSpeed = 100;
 	manual = 0;
+	if (Usb.Init() == -1) {
+		Serial.print(F("\r\nOSC did not start"));
+		while (1);
+		{
+
+		}//halt
+	}
 }
 
 Control::~Control()
@@ -13,7 +22,7 @@ Control::~Control()
 
 void Control::setup()
 {
-	//leds.setup();
+	leds.setup();
 }
 
 void Control::run()
@@ -89,6 +98,7 @@ void Control::run()
 
 int Control::xbox()
 {
+	Usb.Task();
 	if (Xbox.XboxReceiverConnected)
 	{
 		for (uint8_t i = 0; i < 4; i++)
@@ -172,25 +182,25 @@ int Control::xbox()
 					{
 						Xbox.setLedOn(LED1, i);
 						arm.up(10);
-						//leds.set(255, 0, 0);
+						leds.set(255, 0, 0);
 					}
 					if (Xbox.getButtonClick(DOWN, i))
 					{
 						Xbox.setLedOn(LED4, i);
 						arm.down(10);
-						//leds.set(255, 0, 0);
+						leds.set(0, 255, 0);
 					}
 					if (Xbox.getButtonClick(LEFT, i))
 					{
 						Xbox.setLedOn(LED3, i);
 						Serial.println(F("Left"));
-						//leds.set(255, 0, 0);
+						leds.set(0, 0, 255);
 					}
 					if (Xbox.getButtonClick(RIGHT, i))
 					{
 						Xbox.setLedOn(LED2, i);
 						Serial.println(F("Right"));
-						//leds.set(255, 0, 0);
+						leds.set(255, 0, 255);
 					}
 					if (Xbox.getButtonClick(START, i))
 					{

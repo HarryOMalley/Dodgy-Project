@@ -5,7 +5,6 @@
 #include "armServos.h"
 #include <XBOXRECV.h>
 #include "LEDS.h"
-extern XBOXRECV Xbox;
 
 class Control
 {
@@ -25,7 +24,7 @@ public:
 private:
 	Motors motors;
 	armServos arm;
-	//LEDS leds;
+	LEDS leds;
 	int program;
 	int motorSpeed;
 	int manual;

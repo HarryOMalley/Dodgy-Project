@@ -10,5 +10,6 @@ public:
 	~LEDS();
 	void setup();
 	void set(int, int, int);
+	void brightness(int);
 	Adafruit_NeoPixel ledstrip;
 };

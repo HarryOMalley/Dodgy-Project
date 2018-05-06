@@ -22,4 +22,4 @@
 #define pwm4 14
 // LEDS
 #define LEDPIN 4
-#define NUM_LEDS 12
+#define NUM_LEDS 50

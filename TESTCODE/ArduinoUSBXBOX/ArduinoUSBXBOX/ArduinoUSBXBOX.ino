@@ -66,7 +66,7 @@ void loop() {
 					digitalWrite(in2, LOW);
 					digitalWrite(in3, HIGH); // turn on
 					digitalWrite(in4, LOW);
-					analogWrite(enA, speed);
+					analogWrite(enA, speed - (speed /10)); // attempting to fix the slow drift, will need to experiment with this
 					analogWrite(enB, speed);
 					delay(10);
 				}
@@ -88,23 +88,10 @@ void loop() {
 					digitalWrite(in3, LOW); // turn on
 					digitalWrite(in4, LOW);
 				}
-
-
-
-				/*if (Xbox.getButtonPress(L2, i) || Xbox.getButtonPress(R2, i))
-				{
-					Serial.print("L2: ");
-					Serial.print(Xbox.getButtonPress(L2, i));
-					Serial.print("\tR2: ");
-					Serial.println(Xbox.getButtonPress(R2, i));
-					Xbox.setRumbleOn(Xbox.getButtonPress(L2, i), Xbox.getButtonPress(R2, i), i);
-				}*/
-				if ((Xbox.getAnalogHat(LeftHatX, i) > 8000 || Xbox.getAnalogHat(LeftHatX, i) < -8000))
+				if ((Xbox.getAnalogHat(LeftHatX, i) > 8000 || Xbox.getAnalogHat(LeftHatX, i) < -8000)) // turning right and left
 				{
 					LR = Xbox.getAnalogHat(LeftHatX, i); // Gets the values from the left analog stick and saves it to a variable.
-					//FB = Xbox.getAnalogHat(LeftHatY, i);
 					float leftRight, forwardsBackwards;
-
 					if (LR > 0) // right
 					{
 
@@ -130,121 +117,43 @@ void loop() {
 						delay(10);
 
 					}
-
-						//if (leftRight < 128)
-						//{
-						//	digitalWrite(in1, HIGH); // turn on
-						//	digitalWrite(in2, LOW);
-						//	analogWrite(enA, 255 - 2*leftRight);
-						//	digitalWrite(in3, HIGH); // turn on
-						//	digitalWrite(in4, LOW);
-						//	analogWrite(enB, leftRight);
-						//}
-						//else if (leftRight > 128)
-						//{
-						//	digitalWrite(in1, LOW); // turn on
-						//	digitalWrite(in2, HIGH);
-						//	analogWrite(enA, 2*leftRight - 255);
-						//	digitalWrite(in3, HIGH); // turn on
-						//	digitalWrite(in4, LOW);
-						//	analogWrite(enB, leftRight);
-						//}
-			
 				}
-				//if (LR > 0) // forwards
-				//{
-				//	leftRight = (LR / 32768) * 255; // scaling to 0 to 255, rather than 0 to -32768 for analogWrite
-				//	if (FB > 0)
-				//	{
-				//		forwardsBackwards = (FB / 32768) * 255;
-				//		analogWrite(enA, leftRight);
-				//		analogWrite(enB, forwardsBackwards);
-				//		digitalWrite(in1, HIGH); // turn on
-				//		digitalWrite(in2, LOW);
-				//		digitalWrite(in3, HIGH); // turn on
-				//		digitalWrite(in4, LOW);
-				//		//Serial.println("updated speeds");
-				//		delay(10);
-						//if ((count % 20) == 0)
-						//{
-
-						//	Serial.print(F("lr: "));
-						//	Serial.print(LR);
-						//	Serial.print("\t");
-
-
-						//	Serial.print(F("fb: "));
-						//	Serial.print(FB);
-						//	Serial.print("\t");	aq1QQA
-						//	Serial.println(count);
-						//	//Serial.println();
-						//}
-
-					//}
-					//else if (FB < 0)
-					//{
-					//	forwardsBackwards = (FB / 32768) * 255;
-					//	analogWrite(enA, leftRight);
-					//	analogWrite(enB, forwardsBackwards);
-					//	digitalWrite(in1, HIGH); // turn on
-					//	digitalWrite(in2, LOW);
-					//	digitalWrite(in3, HIGH); // turn on
-					//	digitalWrite(in4, LOW);
-					//	//Serial.println("updated speeds");
-					//	delay(10);
-					//	//if ((count % 20) == 0)
-					//	//{
-
-					//	//	Serial.print(F("lr: "));
-					//	//	Serial.print(LR);
-					//	//	Serial.print("\t");
-
-
-					//	//	Serial.print(F("fb: "));
-					//	//	Serial.print(FB);
-					//	//	Serial.print("\t");	aq1QQA
-					//	//	Serial.println(count);
-					//	//	//Serial.println();
-					//	//}
-
-					//}
-					//count++;
-		//	}
-		//}
-		//else // backwards
-		//{
-
 
 			}
 			else
 			{
-				//digitalWrite(in1, LOW); // turn off
-				//digitalWrite(in2, LOW);
-				//digitalWrite(in3, LOW); // turn off
-				//digitalWrite(in4, LOW);
+				digitalWrite(in1, LOW); // turn off
+				digitalWrite(in2, LOW);
+				digitalWrite(in3, LOW); // turn off
+				digitalWrite(in4, LOW);
 			}
-			if (Xbox.getButtonClick(UP, i)) {
+			if (Xbox.getButtonClick(UP, i)) 
+			{
 				Xbox.setLedOn(LED1, i);
 				Serial.println(F("Up"));
 			}
-			if (Xbox.getButtonClick(DOWN, i)) {
+			if (Xbox.getButtonClick(DOWN, i))
+			{
 				Xbox.setLedOn(LED4, i);
 				Serial.println(F("Down"));
 			}
-			if (Xbox.getButtonClick(LEFT, i)) {
+			if (Xbox.getButtonClick(LEFT, i)) 
+			{
 				Xbox.setLedOn(LED3, i);
 				Serial.println(F("Left"));
 			}
-			if (Xbox.getButtonClick(RIGHT, i)) {
+			if (Xbox.getButtonClick(RIGHT, i)) 
+			{
 				Xbox.setLedOn(LED2, i);
 				Serial.println(F("Right"));
 			}
-
-			if (Xbox.getButtonClick(START, i)) {
+			if (Xbox.getButtonClick(START, i))
+			{
 				Xbox.setLedMode(ALTERNATING, i);
 				Serial.println(F("Start"));
 			}
-			if (Xbox.getButtonClick(BACK, i)) {
+			if (Xbox.getButtonClick(BACK, i)) 
+			{
 				Xbox.setLedBlink(ALL, i);
 				Serial.println(F("Back"));
 			}
@@ -257,13 +166,15 @@ void loop() {
 				Serial.println(F("L1"));
 			if (Xbox.getButtonClick(R1, i))
 				Serial.println(F("R1"));
-			if (Xbox.getButtonClick(XBOX, i)) {
+			if (Xbox.getButtonClick(XBOX, i))
+			{
 				Xbox.setLedMode(ROTATING, i);
 				Serial.print(F("Xbox (Battery: "));
 				Serial.print(Xbox.getBatteryLevel(i)); // The battery level in the range 0-3
 				Serial.println(F(")"));
 			}
-			if (Xbox.getButtonClick(SYNC, i)) {
+			if (Xbox.getButtonClick(SYNC, i))
+			{
 				Serial.println(F("Sync"));
 				Xbox.disconnect(i);
 			}

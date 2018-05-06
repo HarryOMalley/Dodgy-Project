@@ -4,19 +4,22 @@ Control::Control()
 {
 	program = 0;
 	motorSpeed = 100;
+	manual = 0;
 }
 
 Control::~Control()
 {
 }
 
+void Control::setup()
+{
+	//leds.setup();
+}
+
 void Control::run()
 {
-
-
 	if (xbox() == 0)
 	{
-
 		int newProgram;
 		newProgram = getInput();
 		while (Serial.available() > 0)
@@ -82,119 +85,170 @@ void Control::run()
 		}
 		return;
 	}
-	else
-		manualControl();
 }
 
 int Control::xbox()
 {
-	Usb.Task();
 	if (Xbox.XboxReceiverConnected)
 	{
 		for (uint8_t i = 0; i < 4; i++)
 		{
 			if (Xbox.Xbox360Connected[i])
 			{
-				if (Xbox.getButtonClick(Y, i))
-				{ // manual override/mqtt mode
-					if (busy == true) 
+				if (manual == 0) // checking if you want to change to manual control first
+				{
+					if (Xbox.getButtonClick(Y, i))
 					{
-						busy = false;
+						manual = 1;
+					}
+				}
+				if (manual == 1) 
+				{
+					if (Xbox.getButtonClick(B, i)) // if now in manual mode, checking if you want to go into automatic control
+					{
+						manual = 0;
+						return 0;
+					}
+					if (Xbox.getButtonPress(R2, i) > 10) // in manual control, now is doing the calculations to move using the xbox controller
+					{
+						int speed = Xbox.getButtonPress(R2, i);
+						digitalWrite(in1, HIGH); // turn on
+						digitalWrite(in2, LOW);
+						digitalWrite(in3, HIGH); // turn on
+						digitalWrite(in4, LOW);
+						analogWrite(enA, speed - (speed / 10)); // attempting to fix the slow drift, will need to experiment with this
+						analogWrite(enB, speed);
+						delay(10);
+					}
+					else if (Xbox.getButtonPress(L2, i) > 10)
+					{
+						int speed = Xbox.getButtonPress(L2, i);
+						digitalWrite(in1, LOW); // turn on
+						digitalWrite(in2, HIGH);
+						digitalWrite(in3, LOW); // turn on
+						digitalWrite(in4, HIGH);
+						analogWrite(enA, speed);
+						analogWrite(enB, speed);
+						delay(10);
 					}
 					else
 					{
-						busy = true;
-						manualProgram = 0;
-						delay(100);
+						digitalWrite(in1, LOW); // turn on
+						digitalWrite(in2, LOW);
+						digitalWrite(in3, LOW); // turn on
+						digitalWrite(in4, LOW);
 					}
-				}
-				if (busy == true)
-				{
-					run();
-					//delay(100);
-				}
-				else if (busy == false)
-				{
-					if ((Xbox.getAnalogHat(LeftHatX, i) > 8000 || Xbox.getAnalogHat(LeftHatX, i) < -8000 || Xbox.getAnalogHat(LeftHatY, i) > 8000 || Xbox.getAnalogHat(LeftHatY, i) < -8000))
+					if ((Xbox.getAnalogHat(LeftHatX, i) > 8000 || Xbox.getAnalogHat(LeftHatX, i) < -8000)) // turning right and left
 					{
-						LR = Xbox.getAnalogHat(LeftHatX, i); // Gets the values from the left analog stick and saves it to a variable.
-						FB = Xbox.getAnalogHat(LeftHatY, i);
-						LR = LR * -1; // Converts the recieved value from controller to a value between 30 and 150 which is what the servos work off.
-						LR = LR / 32768;
-						LR = LR * 60;
-						LR = LR;
-						/*Serial.print(F("LeftHatX: ")); // Used for debugging.
-						Serial.print(LR);
-						Serial.print("\t");*/
-						FB = FB * -1; // Same process, but for the forward backward movement.
-						FB = FB / 32768;
-						FB = FB * 60;
-						FB = FB + 90;
-						drive(LR, FB);
+						int LR = Xbox.getAnalogHat(LeftHatX, i); // Gets the values from the left analog stick and saves it to a variable.
+						float leftRight, forwardsBackwards;
+						if (LR > 0) // right
+						{
+
+							leftRight = (LR / 32768) * 255; // scaling to 0 to 255, rather than 0 to -32768 for analogWrite
+							digitalWrite(in1, LOW); // turn on
+							digitalWrite(in2, HIGH);
+							analogWrite(enA, leftRight);
+							digitalWrite(in3, HIGH); // turn on
+							digitalWrite(in4, LOW);
+							analogWrite(enB, leftRight);
+							delay(10);
+						}
+						else if (LR < 0) // right
+						{
+
+							leftRight = (-LR / 32768) * 255; // scaling to 0 to 255, rather than 0 to -32768 for analogWrite
+							digitalWrite(in1, HIGH); // turn on
+							digitalWrite(in2, LOW);
+							analogWrite(enA, leftRight);
+							digitalWrite(in3, LOW); // turn on
+							digitalWrite(in4, HIGH);
+							analogWrite(enB, leftRight);
+							delay(10);
+
+						}
 					}
-					else 
+					if (Xbox.getButtonClick(UP, i))
 					{
-						drive(neutral, neutral); // dont turn the motors if nothing from analogue or deadzone
+						Xbox.setLedOn(LED1, i);
+						arm.up(10);
+						//leds.set(255, 0, 0);
 					}
-					//          Serial.print(motor1.read());
-					//          Serial.print("  ");
-					//          Serial.println(motor2.read());
-					if (Xbox.getButtonClick(X, i)) // compact
-					{ 
-						manualProgram = 1;
-						run();
+					if (Xbox.getButtonClick(DOWN, i))
+					{
+						Xbox.setLedOn(LED4, i);
+						arm.down(10);
+						//leds.set(255, 0, 0);
 					}
-					if (Xbox.getButtonClick(A, i)) // stabmode
-					{ 
-						manualProgram = 2;
-						run();
+					if (Xbox.getButtonClick(LEFT, i))
+					{
+						Xbox.setLedOn(LED3, i);
+						Serial.println(F("Left"));
+						//leds.set(255, 0, 0);
 					}
-					if (Xbox.getButtonClick(B, i)) // flick
-					{ 
-						manualProgram = 3;
-						run();
+					if (Xbox.getButtonClick(RIGHT, i))
+					{
+						Xbox.setLedOn(LED2, i);
+						Serial.println(F("Right"));
+						//leds.set(255, 0, 0);
 					}
+					if (Xbox.getButtonClick(START, i))
+					{
+						Xbox.setLedMode(ALTERNATING, i);
+						Serial.println(F("Start"));
+
+					}
+					if (Xbox.getButtonClick(BACK, i))
+					{
+						Xbox.setLedBlink(ALL, i);
+						Serial.println(F("Back"));
+					}
+					if (Xbox.getButtonClick(L3, i))
+						Serial.println(F("L3"));
+					if (Xbox.getButtonClick(R3, i))
+						Serial.println(F("R3"));
+
+					if (Xbox.getButtonClick(L1, i))
+						Serial.println(F("L1"));
+					if (Xbox.getButtonClick(R1, i))
+						Serial.println(F("R1"));
+					if (Xbox.getButtonClick(XBOX, i))
+					{
+						Xbox.setLedMode(ROTATING, i);
+						Serial.print(F("Xbox (Battery: "));
+						Serial.print(Xbox.getBatteryLevel(i)); // The battery level in the range 0-3
+						Serial.println(F(")"));
+					}
+					if (Xbox.getButtonClick(SYNC, i))
+					{
+						Serial.println(F("Sync"));
+						Xbox.disconnect(i);
+					}
+					if (Xbox.getButtonClick(A, i))
+						Serial.println(F("A"));
+					if (Xbox.getButtonClick(B, i))
+						Serial.println(F("B"));
+					if (Xbox.getButtonClick(X, i))
+						Serial.println(F("X"));
+					if (Xbox.getButtonClick(Y, i))
+						Serial.println(F("Y"));
 				}
+				else
+					return 0;
+			}
+			else if (manual == 1)
+			{
+				digitalWrite(in1, LOW); // turn off
+				digitalWrite(in2, LOW);
+				digitalWrite(in3, LOW); // turn off
+				digitalWrite(in4, LOW);
 			}
 		}
 	}
-	if ((manualProgram == 0) && (busy)) {
-		return 0;
-		if (check != 0) {
-			Serial.println("run from mqtt");
-			if (newProgram > 500 && newProgram < 1500) { // compact
-				tri_track.servoRun(1);
-			}
-			else if (newProgram > 1500 && newProgram < 2500) // stab
-				tri_track.servoRun(2);
-			else if (newProgram > 2500 && newProgram < 3500) // flick
-				tri_track.servoRun(3);
-			else if (newProgram > 3500 && newProgram < 4500) //
-				tri_track.servoRun(4);
-			else if (newProgram > 4500 && newProgram < 5500) //
-				tri_track.servoRun(5);
-			if (rotation == 0) {
-				tri_track.servoRun(6, 0);
-			}
-			else if (rotation == 1) {
-				tri_track.servoRun(6, 1);
-			}
-		}
-	}
-	else if (manualProgram != 0) {
-		if (manualProgram == 1) // compact
-			tri_track.servoRun(1);
-		if (manualProgram == 2) // stab
-			tri_track.servoRun(2);
-		if (manualProgram == 3) // flick
-			tri_track.servoRun(3);
-		manualProgram = 0;
-	}
-}
-
-void Control::manualControl()
-{
-
+	else
+	{
+		return -1; //Serial.println("not connected to controller");
+	}	
 }
 
 int Control::getInput()
@@ -205,8 +259,7 @@ int Control::getInput()
 		return 0;
 	int newProgram;
 	newProgram = pulseIn(pwm2, HIGH);
-	//Serial.print("input: ");
-	//Serial.println(newProgram);
+
 	if (newProgram > 500 && newProgram < 1500)
 		program = 1;
 	else if (newProgram > 1500 && newProgram < 2500)
@@ -238,20 +291,9 @@ int Control::getSpeed()
 	return newSpeed;
 }
 
-
 void Control::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
 {
 	EEPROM.write(MOTOR_SPEED, motorSpeed);
 	EEPROM.write(MOTOR_STATUS, motorStatus);
 	EEPROM.write(MOTOR_DIRECTION, currentDirection);
-}
-
-long Control::readMotors()
-{
-
-}
-
-void Control::resetMotors()
-{
-
 }

@@ -23,7 +23,7 @@ public:
 	int getRotationDirection();
 	void updateEEPROM(int motorSpeed, int motorStatus, int currentDirection);
 	void getStatus();
-	void calibrate(void);
+	//void calibrate(void); need to fix this, or not use
 private:
 	int currentDirection;
 	int motorStatus;

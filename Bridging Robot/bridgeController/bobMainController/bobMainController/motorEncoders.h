@@ -10,14 +10,9 @@ public:
 	~motorEncoders();
 	readings read();
 	void reset();
-	int speedRight();
-	int speedLeft();
-	void calibrate(void);
 private:
 	long positionLeft;
 	long positionRight;
-	int rightMotorAnalogue;
-	int leftMotorAnalogue;
 };
 
 

@@ -118,7 +118,66 @@ void loop() {
 
 					}
 				}
+				if (Xbox.getButtonClick(UP, i))
+				{
+					Xbox.setLedOn(LED1, i);
+					Serial.println(F("Up"));
+				}
+				if (Xbox.getButtonClick(DOWN, i))
+				{
+					Xbox.setLedOn(LED4, i);
+					Serial.println(F("Down"));
+				}
+				if (Xbox.getButtonClick(LEFT, i))
+				{
+					Xbox.setLedOn(LED3, i);
+					Serial.println(F("Left"));
+				}
+				if (Xbox.getButtonClick(RIGHT, i))
+				{
+					Xbox.setLedOn(LED2, i);
+					Serial.println(F("Right"));
+				}
+				if (Xbox.getButtonClick(START, i))
+				{
+					Xbox.setLedMode(ALTERNATING, i);
+					Serial.println(F("Start"));
+				}
+				if (Xbox.getButtonClick(BACK, i))
+				{
+					Xbox.setLedBlink(ALL, i);
+					Serial.println(F("Back"));
+				}
+				if (Xbox.getButtonClick(L3, i))
+					Serial.println(F("L3"));
+				if (Xbox.getButtonClick(R3, i))
+					Serial.println(F("R3"));
 
+				if (Xbox.getButtonClick(L1, i))
+					Serial.println(F("L1"));
+				if (Xbox.getButtonClick(R1, i))
+					Serial.println(F("R1"));
+				if (Xbox.getButtonClick(XBOX, i))
+				{
+					Xbox.setLedMode(ROTATING, i);
+					Serial.print(F("Xbox (Battery: "));
+					Serial.print(Xbox.getBatteryLevel(i)); // The battery level in the range 0-3
+					Serial.println(F(")"));
+				}
+				if (Xbox.getButtonClick(SYNC, i))
+				{
+					Serial.println(F("Sync"));
+					Xbox.disconnect(i);
+				}
+
+				if (Xbox.getButtonClick(A, i))
+					Serial.println(F("A"));
+				if (Xbox.getButtonClick(B, i))
+					Serial.println(F("B"));
+				if (Xbox.getButtonClick(X, i))
+					Serial.println(F("X"));
+				if (Xbox.getButtonClick(Y, i))
+					Serial.println(F("Y"));
 			}
 			else
 			{
@@ -127,66 +186,6 @@ void loop() {
 				digitalWrite(in3, LOW); // turn off
 				digitalWrite(in4, LOW);
 			}
-			if (Xbox.getButtonClick(UP, i)) 
-			{
-				Xbox.setLedOn(LED1, i);
-				Serial.println(F("Up"));
-			}
-			if (Xbox.getButtonClick(DOWN, i))
-			{
-				Xbox.setLedOn(LED4, i);
-				Serial.println(F("Down"));
-			}
-			if (Xbox.getButtonClick(LEFT, i)) 
-			{
-				Xbox.setLedOn(LED3, i);
-				Serial.println(F("Left"));
-			}
-			if (Xbox.getButtonClick(RIGHT, i)) 
-			{
-				Xbox.setLedOn(LED2, i);
-				Serial.println(F("Right"));
-			}
-			if (Xbox.getButtonClick(START, i))
-			{
-				Xbox.setLedMode(ALTERNATING, i);
-				Serial.println(F("Start"));
-			}
-			if (Xbox.getButtonClick(BACK, i)) 
-			{
-				Xbox.setLedBlink(ALL, i);
-				Serial.println(F("Back"));
-			}
-			if (Xbox.getButtonClick(L3, i))
-				Serial.println(F("L3"));
-			if (Xbox.getButtonClick(R3, i))
-				Serial.println(F("R3"));
-
-			if (Xbox.getButtonClick(L1, i))
-				Serial.println(F("L1"));
-			if (Xbox.getButtonClick(R1, i))
-				Serial.println(F("R1"));
-			if (Xbox.getButtonClick(XBOX, i))
-			{
-				Xbox.setLedMode(ROTATING, i);
-				Serial.print(F("Xbox (Battery: "));
-				Serial.print(Xbox.getBatteryLevel(i)); // The battery level in the range 0-3
-				Serial.println(F(")"));
-			}
-			if (Xbox.getButtonClick(SYNC, i))
-			{
-				Serial.println(F("Sync"));
-				Xbox.disconnect(i);
-			}
-
-			if (Xbox.getButtonClick(A, i))
-				Serial.println(F("A"));
-			if (Xbox.getButtonClick(B, i))
-				Serial.println(F("B"));
-			if (Xbox.getButtonClick(X, i))
-				Serial.println(F("X"));
-			if (Xbox.getButtonClick(Y, i))
-				Serial.println(F("Y"));
 		}
 	}
 	else

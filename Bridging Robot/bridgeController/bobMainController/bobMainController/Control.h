@@ -4,27 +4,29 @@
 #include "motors.h"
 #include "armServos.h"
 #include <XBOXRECV.h>
+#include "LEDS.h"
+extern XBOXRECV Xbox;
 
 class Control
 {
 public:
 	Control();
 	~Control();
+	void setup();
 	void run();
 	int xbox();
-	void manualControl();
 	int getInput();
 	int getSpeed();
 	//int getRotation();
 	void updateEEPROM(int motorSpeed, int motorStatus, int currentDirection);
-	long readMotors();
-	void resetMotors();
 	bool busy;
 	int manualProgram;
 
 private:
 	Motors motors;
 	armServos arm;
+	//LEDS leds;
 	int program;
 	int motorSpeed;
+	int manual;
 };

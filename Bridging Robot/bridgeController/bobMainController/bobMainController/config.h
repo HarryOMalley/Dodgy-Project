@@ -20,3 +20,6 @@
 #define pwm2 12
 #define pwm3 13
 #define pwm4 14
+// LEDS
+#define LEDPIN 4
+#define NUM_LEDS 12

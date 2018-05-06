@@ -2,8 +2,7 @@
 
 motorEncoders::motorEncoders()
 {
-	rightMotorAnalogue = 0;
-	leftMotorAnalogue = 0;
+
 }
 
 motorEncoders::~motorEncoders()
@@ -25,15 +24,3 @@ void motorEncoders::reset()
 	motorLeft.write(0);
 	Serial.println("Reset the motors");
 }
-
-//int motorEncoders::speedRight()
-//{
-//	int calibratedSpeed = motorSpeed + rightMotorAnalogue;
-//	return calibratedSpeed;
-//}
-//
-//int motorEncoders::speedLeft()
-//{
-//	int calibratedSpeed = motorSpeed + leftMotorAnalogue;
-//	return calibratedSpeed;
-//}

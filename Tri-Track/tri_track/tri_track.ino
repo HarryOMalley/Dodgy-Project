@@ -84,8 +84,8 @@ void loop() {
           //delay(100);
         } else if (io.busy == false) {
           if ((Xbox.getAnalogHat(LeftHatX, i) > 8000 || Xbox.getAnalogHat(LeftHatX, i) < -8000 || Xbox.getAnalogHat(LeftHatY, i) > 8000 || Xbox.getAnalogHat(LeftHatY, i) < -8000)) {
-            LR = Xbox.getAnalogHat(LeftHatX, i); // Gets the values from the left analog stick and saves it to a variable.
-            FB = Xbox.getAnalogHat(LeftHatY, i);
+            LR = Xbox.getAnalogHat(LeftHatY, i); // Gets the values from the left analog stick and saves it to a variable.
+            FB = Xbox.getAnalogHat(LeftHatX, i);
             LR = LR * -1; // Converts the recieved value from controller to a value between 30 and 150 which is what the servos work off.
             LR = LR / 32768;
             LR = LR * 60;

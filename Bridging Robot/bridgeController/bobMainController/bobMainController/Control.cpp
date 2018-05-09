@@ -276,7 +276,6 @@ int Control::getInput()
 		return 0;
 	int newProgram;
 	newProgram = pulseIn(pwm2, HIGH);
-
 	if (newProgram > 500 && newProgram < 1500)
 		program = 1;
 	else if (newProgram > 1500 && newProgram < 2500)

@@ -1,21 +1,18 @@
 /*
- Name:		bridgeController.ino
- Created:	4/18/2018 1:55:48 PM
- Author:	harryomalley
+Name:		bridgeController.ino
+Created:	4/18/2018 1:55:48 PM
+Author:	harryomalley
 */
-
-#include <WiFi.h>
+#include <ESP8266WiFi.h>
 #include <PubSubClient.h>
+#include <Wire.h>
 #include <EEPROM.h>
-#include <esp32-hal-ledc.h>
 #define MOTOR_DIRECTION 0
 #define MOTOR_STATUS 1
 #define MOTOR_SPEED 2
-#define BUILTIN_LED 2
-
 int addr = 0; // Current address in the EEPROM
 			  // connect motor controller pins to Arduino digital pins
-// motor one
+			  // motor one
 int enA = 16;
 int in1 = 5;
 int in2 = 4;
@@ -25,18 +22,14 @@ int currentDirection, motorStatus, motorSpeed;
 // Wifi Settings
 const char* ssid = "Dodgy Wifi";
 const char* password = "";
-const char* mqtt_server = "192.168.1.5";
+const char* mqtt_server = "192.168.1.3";
 
 WiFiClient espClient;
 PubSubClient client(espClient);
 long lastMsg = 0;
 char msg[50];
 int value = 0;
-// for pwm - using LEDC rather than analogWrite
-int freq = 5000;
-int ledChannel = 0;
-int resolution = 8;
-ledcAttachPin(enA, 0);
+
 void setup()
 {
 	Serial.begin(9600);
@@ -82,7 +75,7 @@ void setup()
 
 void loop()
 {
-	if (!client.connected()) 
+	if (!client.connected())
 	{
 		reconnect();
 	}
@@ -99,16 +92,16 @@ void loop()
 	//}
 }
 
-	/*int program;
-	while (Serial.available() > 0)
-	{
-		program = Serial.parseInt();
-		motor(program);
-	}
-	while (Serial.available() == 0)
-	{
-		motorRun();
-	}*/
+/*int program;
+while (Serial.available() > 0)
+{
+program = Serial.parseInt();
+motor(program);
+}
+while (Serial.available() == 0)
+{
+motorRun();
+}*/
 
 void motor(int program)
 {
@@ -317,13 +310,18 @@ void callback(char* topic, byte* payload, unsigned int length) {
 	Serial.println();
 
 	// Switch on the LED if an 1 was received as first character
-	if ((char)payload[0] == '0') 
+	if ((char)payload[0] == '0')
 	{
 		digitalWrite(BUILTIN_LED, HIGH);   // Turn the LED on (Note that LOW is the voltage level
 		motor(0);							  // but actually the LED is on; this is because
-										  // it is acive low on the ESP-01)
+											  // it is acive low on the ESP-01)
 	}
 	else if ((char)payload[0] == '1')
+	{
+		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
+		motor(1);
+	}
+	else if ((char)payload[0] == '2')
 	{
 		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
 		motorSpeed = 255;
@@ -337,11 +335,6 @@ void callback(char* topic, byte* payload, unsigned int length) {
 		delay(100);
 		digitalWrite(BUILTIN_LED, LOW);
 	}
-	else if ((char)payload[0] == '2')
-	{
-		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
-		motor(1);
-	}
 	else if ((char)payload[0] == '3')
 	{
 		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
@@ -351,6 +344,11 @@ void callback(char* topic, byte* payload, unsigned int length) {
 	{
 		digitalWrite(BUILTIN_LED, LOW);  // Turn the LED off by making the voltage HIGH
 		motor(4);
+	}
+	else if ((char)payload[0] == '4')
+	{
+		digitalWrite(BUILTIN_LED, HIGH);  // Turn the LED off by making the voltage HIGH
+		motor(0);
 	}
 }
 void setup_wifi() {

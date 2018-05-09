@@ -6,6 +6,7 @@
 #define pwm1 7 // digital
 #define pwm2 6
 #define pwm3 5
+#define stop 4
 
 bool SERVO_STATUS = false;
 
@@ -13,11 +14,11 @@ Servo right;
 Servo left;// create servo object to control a servo
 			   // twelve servo objects can be created on most boards
 
-int angle = 0;    // variable to store the servo position
+int angle = EEPROM.read(0);   // variable to store the servo position
 
 void setup()
 {
-	right.write(angle);
+	right.write(angle - 5);
 	left.write(180 - angle);
 	Serial.begin(9600);
 	right.attach(pin1);
@@ -33,10 +34,24 @@ void loop()
 		program = Serial.parseInt();
 		Serial.println(program);
 	}
-	
+
 	if (program != 0)
 	{
 		run(program);
+	}
+	if (SERVO_STATUS == true)
+		servoCheck();
+}
+
+void servoCheck()
+{
+	if (right.read() != angle)
+	{
+		servoMove(angle);
+	}
+	if (left.read() != (180 - angle))
+	{
+		servoMove(angle);
 	}
 }
 
@@ -51,7 +66,8 @@ int run(int program)
 		SERVO_STATUS = true;
 		break;
 	case 3: // move to angle
-		servoMove(getAngle());
+		angle = getAngle();
+		//servoMove(angle);
 		break;
 	case 4: // attach servos
 		servoAttach();
@@ -65,12 +81,13 @@ int run(int program)
 
 int getInput()
 {
-	int check, program;
+	int check, program, newProgram;
 	check = digitalRead(pwm1);
 	if (check != 1)
 		return 0;
-	int newProgram;
+	delay(20);
 	newProgram = pulseIn(pwm2, HIGH);
+	angle = getAngle();
 	if (newProgram > 500 && newProgram < 1500)
 		program = 1;
 	else if (newProgram > 1500 && newProgram < 2500)
@@ -91,44 +108,62 @@ int getInput()
 		program = 9;
 	else
 		return 0;
-		Serial.println(program);
-		return program;
+	Serial.println(program);
+	return program;
 }
 
 void servoMove(int newAngle)
 {
+	int i;
+	int currentAngle = right.read() + 5;
 	if (newAngle > 180 || newAngle < 0) // adding limits
 		return;
-	if (!SERVO_STATUS) //checking if servos should be off
+	if (SERVO_STATUS) //checking if servos should be off
 	{
+		if (newAngle > currentAngle)
+		{
+			for (i = currentAngle; i <= newAngle; i += 1) // goes from 0 degrees to 180 degrees
+			{ 							  // in steps of 1 degree
+				right.write(i - 5);
+				left.write(180 - i);// tell servo to go to position in variable 'pos'
+				delay(100);                       // waits 15ms for the servo to reach the position
+				if (getInterrupt() == 1)
+				{
+					angle = i;
+					SERVO_STATUS = 0;
+					return;
+				}
+			}
+		}
+		else if (newAngle < currentAngle)
+		{
+			for (i = currentAngle; i >= newAngle; i -= 1) // goes from 0 degrees to 180 degrees
+			{ 							  // in steps of 1 degree
+				right.write(i - 5);
+				left.write(180 - i);// tell servo to go to position in variable 'pos'
+				delay(100);                       // waits 15ms for the servo to reach the position
+				if (getInterrupt() == 1)
+				{
+					SERVO_STATUS = 0;
+					angle = i;
+					return;
+				}
+					
+			}
+		}
+		EEPROM.write(0, angle);
+	}
+	else
+	{
+		//angle = currentAngle;
 		Serial.println("Servo should be off");
 		return;
 	}
-	if (newAngle > angle)
-	{
-		for (angle; angle <= newAngle; angle += 1) // goes from 0 degrees to 180 degrees
-		{ 							  // in steps of 1 degree
-			right.write(angle);
-			left.write(180 - angle);// tell servo to go to position in variable 'pos'
-			delay(100);                       // waits 15ms for the servo to reach the position
-		}
-		angle = newAngle;
-	}
-	else if (newAngle < angle)
-	{
-		for (angle; angle >= newAngle; angle -= 1) // goes from 0 degrees to 180 degrees
-		{ 							  // in steps of 1 degree
-			right.write(angle);
-			left.write(180 - angle);// tell servo to go to position in variable 'pos'
-			delay(100);                       // waits 15ms for the servo to reach the position
-		}
-		angle = newAngle;
-	}
 }
 
-void servoUp(int newAngle)
+void servoUp(int currentAngle)
 {
-	for (angle; angle <= newAngle; angle += 1) // goes from 0 degrees to 180 degrees
+	for (angle; angle <= currentAngle; angle += 1) // goes from 0 degrees to 180 degrees
 	{ 							  // in steps of 1 degree
 		right.write(angle);
 		left.write(180 - angle);// tell servo to go to position in variable 'pos'
@@ -138,10 +173,10 @@ void servoUp(int newAngle)
 
 void servoUp()
 {
-	int newAngle = getAngle();
-	if (newAngle > angle)
+	int currentAngle = getAngle();
+	if (currentAngle > angle)
 	{
-		for (angle; angle <= newAngle; angle += 1) // goes from 0 degrees to 180 degrees
+		for (angle; angle <= currentAngle; angle += 1) // goes from 0 degrees to 180 degrees
 		{ 							  // in steps of 1 degree
 			right.write(angle);
 			left.write(180 - angle);// tell servo to go to position in variable 'pos'
@@ -150,9 +185,9 @@ void servoUp()
 	}
 }
 
-void servoDown(int newAngle)
+void servoDown(int currentAngle)
 {
-	for (angle; angle >= newAngle; angle -= 1) // goes from 0 degrees to 180 degrees
+	for (angle; angle >= currentAngle; angle -= 1) // goes from 0 degrees to 180 degrees
 	{ 							  // in steps of 1 degree
 		right.write(angle);
 		left.write(180 - angle);// tell servo to go to position in variable 'pos'
@@ -162,10 +197,10 @@ void servoDown(int newAngle)
 
 void servoDown()
 {
-	int newAngle = getAngle();
-	if (newAngle < angle)
+	int currentAngle = getAngle();
+	if (currentAngle < angle)
 	{
-		for (angle; angle >= newAngle; angle -= 1) // goes from 0 degrees to 180 degrees
+		for (angle; angle >= currentAngle; angle -= 1) // goes from 0 degrees to 180 degrees
 		{ 							  // in steps of 1 degree
 			right.write(angle);
 			left.write(180 - angle);// tell servo to go to position in variable 'pos'
@@ -176,17 +211,20 @@ void servoDown()
 
 int getAngle()
 {
-	int newAngle;
-	newAngle = (pulseIn(pwm3, HIGH)) / 10;
-	newAngle -= 6; // fixing the error that is usually present
-	//if (round(newAngle) > newAngle)
-	//{
-	//	newAngle = round(newAngle - 4);
-	//}
-	//else
-	//	newAngle = round(newAngle);
-	Serial.println(newAngle);
-	return newAngle;
+	int currentAngle;
+	currentAngle = (pulseIn(pwm3, HIGH)) / 10;
+	currentAngle -= 6; // fixing the error that is usually present
+	Serial.println(currentAngle);
+	return currentAngle;
+}
+
+int getInterrupt()
+{
+	if (digitalRead(stop) == 1)
+	{
+		Serial.println("STOPPING");
+		return 1;
+	}
 }
 
 void servoDetach()

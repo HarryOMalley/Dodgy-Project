@@ -1,23 +1,23 @@
 //
 //
 //
-#include "io.h"
+#include "control.h"
 
-IO::IO()/*:  tri_track(2, 3, 4, 5, 6, 7)*/ {
-  //Serial.println("io constr");  
+control::control()/*:  tri_track(2, 3, 4, 5, 6, 7)*/ {
+  //Serial.println("control constr");  
   }
 /*	motor1.attach(8); // Attaches a pin to a servo.
 	motor2.attach(9);*/
 
-void IO::run()
+void control::run()
 {
-  Serial.print(busy);
+  Serial.print(busy); // 1 or 0
   Serial.print("  ");
   Serial.println("manualprogram");
 
   if ((manualProgram == 0) && (busy)) {
     int newProgram = pulseIn(status, HIGH);
-    int rotation = 1;//pulseIn(pwm2, High);
+    int rotatcontroln = 1;//pulseIn(pwm2, High);
     int check = digitalRead(pwm3);
     //  Serial.println(newProgram);
     if (check != 0) {
@@ -32,9 +32,9 @@ void IO::run()
         tri_track.servoRun(4);
       else if (newProgram > 4500 && newProgram < 5500) //
         tri_track.servoRun(5);
-      if (rotation == 0) {
+      if (rotatcontroln == 0) {
         tri_track.servoRun(6, 0);
-      } else if (rotation == 1) {
+      } else if (rotatcontroln == 1) {
         tri_track.servoRun(6, 1);
       }
     }
@@ -49,7 +49,7 @@ void IO::run()
   }
 }
 /*else if (newProgram > 6500 && newProgram < 7500)
-	// gpio send to pi program
+	// gpcontrol send to pi program
   else if (newProgram > 7500 && newProgram < 8500)
 	program = 8;
   else if (newProgram > 8500 && newProgram < 9500)
@@ -58,15 +58,15 @@ void IO::run()
 	return 0;*/
 
 /*
-int IO::getSpeed()
+int control::getSpeed()
 {
   /*int newSpeed;
     newSpeed = (pulseIn(pwm3, HIGH)) / 10;
     return newSpeed;
 }*/
 
-// location: where in eeprom
+// locatcontroln: where in eeprom
 // save: what to save
-/*void IO::updateEEPROM(int location, int save) {
+/*void control::updateEEPROM(int locatcontroln, int save) {
   EEPROM.write(motorSpeed, save);
 }*/

@@ -19,7 +19,7 @@ arm::arm(){  /*
 int arm::servoRun(int program, int rotation) {
 	if ((program == 6) && ((rotation == 0) || (rotation == 1))) {
 		rotate(rotation);
-		saveState(4);
+		saveState(program);
 	}
 }
 

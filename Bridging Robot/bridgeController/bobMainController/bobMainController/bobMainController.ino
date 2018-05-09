@@ -25,8 +25,7 @@ void setup()
 #endif
 	Serial.print(F("\r\nXbox Wireless Receiver Library Started"));
 	Serial.println("/n Finished initialising");
-	control.setup();
-	
+	control.setup();	
 }
 
 void loop()

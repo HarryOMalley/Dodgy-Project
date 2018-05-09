@@ -23,7 +23,6 @@ public:
 
 private:
 	Motors motors;
-	armServos arm;
 	LEDS leds;
 	int program;
 	int motorSpeed;

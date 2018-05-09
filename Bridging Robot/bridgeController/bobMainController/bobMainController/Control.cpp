@@ -6,7 +6,7 @@ Control::Control()
 {
 	program = 0;
 	motorSpeed = 100;
-	manual = 0;
+	manual = 1;
 	if (Usb.Init() == -1) {
 		Serial.print(F("\r\nOSC did not start"));
 		while (1);
@@ -27,25 +27,26 @@ void Control::setup()
 
 void Control::run()
 {
-	if (xbox() == 0)
+	int check = xbox();
+	if (check == 0)
 	{
-		leds.set(200, 200, 200); // showing control is automatic by showing white
 		int newProgram;
 		newProgram = getInput();
-		while (Serial.available() > 0)
-		{
-			Serial.println("recieved");
-			newProgram = Serial.parseInt();
-		}
 		if (newProgram == 0)
 		{
 			motors.run();
+			return;
 		}
 		else
 		{
 			program = newProgram;
 			Serial.print("Program: ");
 			Serial.println(program);
+		}
+		while (Serial.available() > 0)
+		{
+			Serial.println("recieved");
+			newProgram = Serial.parseInt();
 		}
 		switch (newProgram)
 		{
@@ -56,21 +57,21 @@ void Control::run()
 			motors.motorOn();
 			break;
 		case 3: // change direction
-			motors.setDirection(1); // forwards
+			motors.motorReverse();
 			break;
 		case 4:
-			motors.setDirection(0); // backwards
+			motors.setDirection(1); // forwards
 			break;
 		case 5:
-			
+			motors.setDirection(0); // backwards
 			break;
 		case 6:
-			motorSpeed += 20;
-			motors.setSpeed(motorSpeed);
+			//motorSpeed += 20;
+			motors.setSpeed(getSpeed());
 			break;
 		case 7:
-			motorSpeed -= 20;
-			motors.setSpeed(motorSpeed);
+			//motorSpeed -= 20;
+			motors.setSpeed(getSpeed());
 			//motors.rotate(0); // right
 			break;
 		case 8:
@@ -86,9 +87,9 @@ void Control::run()
 			//motors.calibrate();
 			break;
 		case 12:
-			arm.up(10);
+
 		case 13:
-			arm.down(10);
+
 		default: // run the motors
 			motors.run();
 			break;
@@ -111,21 +112,15 @@ int Control::xbox()
 					if (Xbox.getButtonClick(Y, i))
 					{
 						manual = 1;
-						leds.set(0, 255, 0);
-						delay(10);
-						return 1;
 					}
 				}
-				else if (manual == 1) 
+				if (manual == 1)
 				{
 					if (Xbox.getButtonClick(B, i)) // if now in manual mode, checking if you want to go into automatic control
 					{
 						manual = 0;
-						leds.set(255, 255, 255);
-						delay(10);
 						return 0;
 					}
-					 // showing control is manual by displaying green
 					if (Xbox.getButtonPress(R2, i) > 10) // in manual control, now is doing the calculations to move using the xbox controller
 					{
 						int speed = Xbox.getButtonPress(R2, i);
@@ -133,9 +128,9 @@ int Control::xbox()
 						digitalWrite(in2, LOW);
 						digitalWrite(in3, HIGH); // turn on
 						digitalWrite(in4, LOW);
-						analogWrite(enA, (speed - (speed / 10))); // attempting to fix the slow drift, will need to experiment with this
+						analogWrite(enA, speed - (speed / 10)); // attempting to fix the slow drift, will need to experiment with this
 						analogWrite(enB, speed);
-						
+						delay(10);
 					}
 					else if (Xbox.getButtonPress(L2, i) > 10)
 					{
@@ -155,13 +150,13 @@ int Control::xbox()
 						digitalWrite(in3, LOW); // turn off
 						digitalWrite(in4, LOW);
 					}
+
 					if ((Xbox.getAnalogHat(LeftHatX, i) > 8000 || Xbox.getAnalogHat(LeftHatX, i) < -8000)) // turning right and left
 					{
 						int LR = Xbox.getAnalogHat(LeftHatX, i); // Gets the values from the left analog stick and saves it to a variable.
 						float leftRight, forwardsBackwards;
 						if (LR > 0) // right
 						{
-
 							leftRight = (LR / 32768) * 255; // scaling to 0 to 255, rather than 0 to -32768 for analogWrite
 							digitalWrite(in1, LOW); // turn on
 							digitalWrite(in2, HIGH);
@@ -182,20 +177,17 @@ int Control::xbox()
 							digitalWrite(in4, HIGH);
 							analogWrite(enB, leftRight);
 							delay(10);
-
 						}
 					}
 					if (Xbox.getButtonClick(UP, i))
 					{
 						Xbox.setLedOn(LED1, i);
-						arm.up(10);
-						//leds.set(255, 0, 0);
+						leds.set(255, 0, 0);
 					}
 					if (Xbox.getButtonClick(DOWN, i))
 					{
 						Xbox.setLedOn(LED4, i);
-						arm.down(10);
-						//leds.set(0, 255, 0);
+						leds.set(0, 255, 0);
 					}
 					if (Xbox.getButtonClick(LEFT, i))
 					{
@@ -265,7 +257,7 @@ int Control::xbox()
 	else
 	{
 		return 0; //Serial.println("not connected to controller");
-	}	
+	}
 }
 
 int Control::getInput()

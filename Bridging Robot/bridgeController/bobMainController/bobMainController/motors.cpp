@@ -11,6 +11,9 @@ Motors::Motors()
 	pinMode(pwm1, INPUT);
 	pinMode(pwm2, INPUT);
 	pinMode(pwm3, INPUT);
+	currentDirection = EEPROM.read(MOTOR_DIRECTION);
+	motorStatus = EEPROM.read(MOTOR_STATUS);
+	motorSpeed = EEPROM.read(MOTOR_SPEED);
 	setup();
 	motorEncoders encoders();
 }
@@ -21,28 +24,24 @@ Motors::~Motors()
 
 void Motors::setup()
 {
-	currentDirection = EEPROM.read(MOTOR_DIRECTION);
-	motorStatus = EEPROM.read(MOTOR_STATUS);
-	motorSpeed = EEPROM.read(MOTOR_SPEED);
-	if ((currentDirection != 1) || (currentDirection != 2))
+	/*if ((currentDirection != 0) || (currentDirection != 1))
 	{
 		currentDirection = 1;
 		EEPROM.write(MOTOR_DIRECTION, currentDirection);
 		Serial.println("Changed Motor Direction");
 	}
-	if ((motorStatus != 1) || (motorStatus != 2))
+	if ((motorStatus != 0) || (motorStatus != 1))
 	{
 		motorStatus = 1;
 		EEPROM.write(MOTOR_STATUS, motorStatus);
 		Serial.println("Changed Motor Status");
-	}
+	}*/
 	if (motorSpeed == 0)
 	{
 		motorSpeed = 100;
 		EEPROM.write(MOTOR_SPEED, motorSpeed);
 		Serial.println("Changed Motor Speed");
 	}
-	motorSpeed = 70;
 	Serial.println("Current direction, status and speed are: ");
 	Serial.println(currentDirection);
 	Serial.println(motorStatus);
@@ -334,6 +333,7 @@ void Motors::updateEEPROM(int motorSpeed, int motorStatus, int currentDirection)
 	EEPROM.write(MOTOR_SPEED, motorSpeed);
 	EEPROM.write(MOTOR_STATUS, motorStatus);
 	EEPROM.write(MOTOR_DIRECTION, currentDirection);
+	Serial.println("Updated EEPROM");
 }
 
 void Motors::getStatus()

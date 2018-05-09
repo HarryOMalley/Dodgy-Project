@@ -1,6 +1,6 @@
-#define MOTOR_DIRECTION 0
-#define MOTOR_STATUS 1
-#define MOTOR_SPEED 2
+#define MOTOR_DIRECTION 2
+#define MOTOR_STATUS 3
+#define MOTOR_SPEED 4
 // Encoder pins
 #define enc1 2
 #define enc2 3
@@ -17,8 +17,8 @@
 #define in4 6//
 // PWM pins
 #define pwm1 11
-#define pwm2 12
-#define pwm3 13
+#define pwm2 13
+#define pwm3 12
 #define pwm4 14
 // LEDS
 #define LEDPIN 4 //
